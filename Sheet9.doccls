@@ -1,0 +1,126 @@
+﻿Private Sub spnr_PlNameChange_SpinUp()
+
+' spnr_PlNameChange_SpinUp()
+'
+'Blake Fudge (blake.fudge@sgs.com, bafedm@gmail.com)
+'
+'ActiveX Spinner that selectes the previous single slicer item from the connect slicercache object
+'based on https://stackoverflow.com/a/51671054
+'
+'Change Log
+'05 21 v02
+'   Log Started
+
+Dim sc As SlicerCache
+Dim sL As SlicerCacheLevel
+Dim si As SlicerItem
+Dim slicerItems_Array()
+Dim i As Long
+Dim siCurrentItemIndex As Long
+
+    'For an unknown reason we'll sometimes get an error so let's take care of that here.
+    On Error Resume Next
+
+    'Set the target slicer for the spinner control
+    Set sc = ActiveWorkbook.SlicerCaches("Slicer_PL_Name4")
+    Set sL = sc.SlicerCacheLevels(1)
+
+    'reset incremental counter
+    i = 0
+    
+    'increment through all slicer items in the slicer, set siCurrentItemIndex to the last selected item
+    For Each si In sL.SlicerItems
+        If si.Selected = True Then
+           siCurrentItemIndex = i
+        End If
+        i = i + 1
+    Next
+    
+    'reset incremental counter
+    i = 0
+    
+    'build an array of all the slicer items since you have to set slicer using exact names.
+    'this allows us to use an index value to assign slicer items
+    For Each si In sL.SlicerItems
+        ReDim Preserve slicerItems_Array(i)
+        slicerItems_Array(i) = si.Name
+        i = i + 1
+    Next
+    
+    'if the first slicer item is selected then set the current item index to the last item + 1
+    'to cycle the selected slicer back to the bottom of the list and prevent an out of bounds error
+    If siCurrentItemIndex = 0 Then
+        siCurrentItemIndex = i
+    End If
+    
+    'set the slicer to the current slicer postion minus one
+    sc.VisibleSlicerItemsList = Array(slicerItems_Array(siCurrentItemIndex - 1))
+    
+
+    
+
+End Sub
+
+Private Sub spnr_PlNameChange_SpinDown()
+
+' spnr_PlNameChange_SpinDown()
+'
+'Blake Fudge (blake.fudge@sgs.com, bafedm@gmail.com)
+'
+'ActiveX Spinner that selectes the next single slicer item from the connect slicercache object
+'based on https://stackoverflow.com/a/51671054
+'
+'Change Log
+'05 21 v02
+'   Log Started
+
+Dim sc As SlicerCache
+Dim sL As SlicerCacheLevel
+Dim si As SlicerItem
+Dim slicerItems_Array()
+Dim i As Long
+Dim siCurrentItemIndex As Long
+
+    'For an unknown reason we'll sometimes get an error so let's take care of that here.
+    On Error Resume Next
+
+    'Set the target slicer for the spinner control
+    Set sc = ActiveWorkbook.SlicerCaches("Slicer_PL_Name4")
+    Set sL = sc.SlicerCacheLevels(1)
+
+    'reset incremental counter
+    i = 0
+    
+    'increment through all slicer items in the slicer, set siCurrentItemIndex to the last selected item
+    For Each si In sL.SlicerItems
+        If si.Selected = True Then
+           siCurrentItemIndex = i
+        End If
+        i = i + 1
+    Next
+    
+    'reset incremental counter
+    i = 0
+    
+    'build an array of all the slicer items since you have to set slicer using exact names.
+    'this allows us to use an index value to assign slicer items
+    For Each si In sL.SlicerItems
+        ReDim Preserve slicerItems_Array(i)
+        slicerItems_Array(i) = si.Name
+        i = i + 1
+    Next
+    
+    'if the last slicer is selected then set siCurrentItemIndex to -1 so postion 0 will be selected next
+    'this brings the selected slicer back to the top and prevents an out of bounds error.
+    If siCurrentItemIndex = i - 1 Then
+        siCurrentItemIndex = -1
+    End If
+    
+    'set the slicer to the current slicer postion minus one
+    sc.VisibleSlicerItemsList = Array(slicerItems_Array(siCurrentItemIndex + 1))
+    
+    Application.Wait 10
+    
+
+End Sub
+
