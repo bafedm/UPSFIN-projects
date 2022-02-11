@@ -1,217 +1,133 @@
 Attribute VB_Name = "LcForecastWorksheet"
 '@Folder("Generate PAF Workbook.WS Lc Forecast")
+Option Explicit
 
-Sub PopulateLcForecastWorksheet( _
-                                ByRef wbPaf As Workbook, _
-                                ByVal dtReportingPeriod As Date, _
-                                ByRef objPl As clsPandL, _
-                                ByRef collActivities As Collection)
+'@Description "Generate subtotals, write tables to ws, add values to ws, add formulas to ws"
+Sub Main( _
+                        wbPaf As Workbook, _
+                        objPl As clsPandL, _
+                        dtReportingPeriod As Date, _
+                        collActivities As Collection)
+                        
 
-'create array with dm lc data
-'get activities from dm
-'get activity projects from projects list ws
-'for each activity
-'get p&l finance/finance header objects
-'for each month sum each project rev/cost and store to array
-'next activity
+Dim wsProjectList               As Worksheet
+Dim arrVarActivityProjectList   As Variant      '2d array (0)activity name (1)array of project names
+Dim arrVarPlTotalsByProject     As Variant      '2d array holding project amounts.  See below for schema
+Dim arrVarPlTotalsByActivity    As Variant      '2d array holding activity amounts.  See below for schema
+Dim arrVarPlTotals              As Variant      '2d array of months, (0)Rev Amount USD, (1)Cost Amount USD
 
 
-Dim wsProjectList               As Worksheet                    'Assign Project List ws to variable
-Dim wsAllocations               As Worksheet                    'Assign Allocations ws to variable
-Dim wsLcForecast                As Worksheet
-Dim arrVarLcData                As Variant
+'arrVarPlTotalsByProject array schema
+'(i, 0) Activity Name
+'(i, 1)(j, 0) Project Names Array
+'(i, 1)(j, 1)(x, 0) x = month (1 to dtReportingPeriod), 0 = Rev Amount USD
+'(i, 1)(j, 1)(x, 1) x = month (1 to dtReportingPeriod), 1 = Cost Amount
+'example:
+'   arrVarPlTotalsByProject(0, 0) = OMAN SLICKLINE
+'   arrVarPlTotalsByProject(0, 1)(0, 0) = HCF Call Off
+'   arrVarPlTotalsByProject(0, 1)(0, 1)(1, 0) = (Jan-21 Rev Amount USD)
+'   arrVarPlTotalsByProject(0, 1)(0, 1)(1, 1) = (Jan-21 Costs Amount USD)
+'Full path example:
+'   arrVarPlTotalsByProject(0, 1)(0, 1)(1, 1) = Oman Slickline, HCF Call OFf, Jan-21 Cost Amount USD
 
-Set wsProjectList = wbPaf.Worksheets("Project List")
-Set wsAllocations = wbPaf.Worksheets("Allocations")
-Set wsLcForecast = wbPaf.Worksheets("LC Forecast")
+'arrVarPlTotalsByActivity array schema
+'(i, 0) Activity Name
+'(i, 1)(x, 0) x = month (1 to dtReportingPeriod), 0 = Rev Amount USD
+'(i, 1)(x, 1) x = month (1 to dtReportingPeriod), 1 = Cost Amount
+
+'Assign worksheet to object
+    Set wsProjectList = wbPaf.Worksheets("Project List")
+
+'Get activites and projects from project list ws
+    arrVarActivityProjectList = GetProjectAndActivitiesFromProjectListWs(wsProjectList)
     
-arrVarLcData = GenerateLcArray(wsProjectList, objPl, dtReportingPeriod, collActivities)
+'Populate arrVarPlTotalsByProject array
+    arrVarPlTotalsByProject = GenerateProjectPlSubTotals(objPl, dtReportingPeriod, collActivities, arrVarActivityProjectList)
+    
 
-'arrVarLcData structure
-'0: Activity Name
-'1: Project Name
-'2: Revenue/Cost
-'3...: Monthly Rev or cost total AmountUSD
-
-
-
-'write p&l forecast actual
-'for each month
-'sum monthly values from array for all projects from array
-'write for month data
-'next month
-'set range name
-
-'write activity forecast actual
-'for each activity
-'for each month
-'sum monthly values for activity projects from array
-'write month data
-'next month
-'set name range
-'if no projects set grouping
-
-'write project forecast actual
-'for each project
-'for each month
-'get values from array for project
-'write to month
-'next month
-'set name range
-'if last project set grouping for activity
-
-'next activity
-
-'write formulas
-'write lc formulas
-'for each lc named range
-'for each month
-'write LC, LC%
-'next month
-'next lc named range
-
-'write p&l totals
-'for each month
-'for each activity
-'get month rev/cost cell locations, concate into sum formula
-'next activity
-'write formula to p&l total rev/cost cell for month
-'next month
-
-'write activity
-'for each month
-'for each activity project
-'get month rev/cost cell locations, concate into sum formula
-'next project
-'write formula to rev/cost cell for month
-'next month
+    
+'Populate worksheet
 
 
 
 
 End Sub
 
-'@Description "Builds and array that holds the rev/cost totals for each project"
-Private Function GenerateLcArray( _
-                                    ByRef wsProjects As Worksheet, _
-                                    ByRef objPl As clsPandL, _
-                                    ByVal dtReportingPeriod As Date, _
-                                    ByRef collActivities As Collection)
-
-'create array with dm lc data
-'get activities from dm
-'get activity projects from projects list ws
-'for each activity
-'get p&l finance/finance header objects
-'for each month sum each project rev/cost and store to array
-'next activity
+'@Description "To check arrVarPlTotalsByProject"
+Private Sub DebugCheck_arrVarPlTotalsByProject(arrVarPlTotalsByProject As Variant)
 
 Dim i As Long, j As Long, k As Long, m As Long
-Dim arrVarLcData            As Variant      'Holds LC values for each activity/project/month
-Dim objActivity             As New clsActivity  'an individual activity object
-Dim objProject              As clsProject   'an individual project object
-Dim nmeProjectListActivity  As Name         'a worksheet named range
-Dim rngActivity             As Range
-
-
-
-'arrVarLcData structure
-'0: Activity Name
-'1: Project Name
-'2: Revenue/Cost
-'3...: Monthly Rev or cost total AmountUSD
-
-'redim array with number of projects * 2 and number of months + 3
-    i = 0
-    For Each nmeProjectListActivity In wsProjects.Names
-        If GenericFunctions.StringSearch(1, nmeProjectListActivity.Name, "Project.List_Activity.Name_") > 0 Then
-            i = i + 1 + (wsProjects.Range(nmeProjectListActivity).Rows.Count - 3)
-        End If
-    Next nmeProjectListActivity
-            
-    ReDim arrVarLcData(0 To (i * 2) - 1, 0 To 3 + (Month(dtReportingPeriod) - 1))
-       
-'loop to fill array.
-'for each activity that has p&l
-'get finance table/headers
-'generate unique list of projects from finance table
-'for each project
-'for each monht sum all rev lines, then all costs lines
-'write activity, project, cost/rev, amount to array
-'next month
-'next project
-
-'get finance table and header from activity/p&l
-Dim arrVarFinanceTable As Variant
-Dim arrVarFinanceHeader As Variant
-Dim collFinTableProjects As Collection
-Dim intFinTableTargetMonthIndex As Integer
-Dim dblAmountUSD As Double
+Dim strMonthRevCost As String
 Dim strRevCost As String
-Dim varFinTableProject As Variant
 
+For i = 0 To UBound(arrVarPlTotalsByProject, 1)
+    For j = 0 To UBound(arrVarPlTotalsByProject(i, 1), 1)
+        For k = 1 To UBound(arrVarPlTotalsByProject(i, 1)(j, 1), 1)
+            For m = 0 To 1
+                If m = 0 Then strRevCost = " Rev: " Else strRevCost = " Costs: "
+                strMonthRevCost = " Month: " & MonthName(k, True) & strRevCost & arrVarPlTotalsByProject(i, 1)(j, 1)(k, m)
+                Debug.Print _
+                    "Activity: " & arrVarPlTotalsByProject(i, 0) & _
+                    " Project: " & arrVarPlTotalsByProject(i, 1)(j, 0) & _
+                    strMonthRevCost
+            Next m
+        Next k
+    Next j
+Next i
 
-'reset lc array row counter
+End Sub
+
+'@Description "Gets the activities and projects from the projects list ws
+Private Function GetProjectAndActivitiesFromProjectListWs( _
+                            ByRef wsProjectList As Worksheet) _
+                            As Variant
+
+'With Project list ws
+'for each named range check if it meets activity range pattern
+'get the activity name from the range offset
+'for each row after the header rows get the project name
+'write the (0)activity and (1)project to the array
+
+Dim i As Long, j As Long, k As Long
+Dim arrVarActivityProjectList()     As Variant
+Dim arrStrProjectList()             As String
+Dim n                               As Name
+
+'Get number of activities and redim activity list
     i = 0
+    For Each n In wsProjectList.Names
+        If GenericFunctions.StringSearch(1, n.Name, "Project.List_Activity.Name_") > 0 Then i = i + 1
+    Next n
 
-For Each nmeProjectListActivity In wsProjects.Names
-    If GenericFunctions.StringSearch(1, nmeProjectListActivity.Name, "Project.List_Activity.Name_") > 0 Then
-        
-        'set activity object based on project list activity name
-            Set objActivity = collActivities(wsProjects.Range(nmeProjectListActivity)(1, 2).Value)
-        
-        'get finance data from activity
-            With objActivity
-                If Not GenericFunctions.HasKey(.collParentPl, objPl.strName) Then
-                    arrVarFinanceTable = .dictFinanceDataTable(objPl.strName)
-                    arrVarFinanceHeader = .dictFinanceDataTableHeader(objPl.strName)
-                    'Debug.Print .strName, .dictFinanceDataTable(objPl.strName)(1, 1), .dictFinanceDataTableHeader(objPl.strName)(1)
-                End If
-            End With
-        
-        'reset project collection
-            Set collFinTableProjects = New Collection
-        
-        'get unique list of projects from finance table
-            For j = 0 To UBound(arrVarFinanceTable, 1)
-                If Not GenericFunctions.HasKey(collFinTableProjects, CStr(arrVarFinanceTable(j, 0))) Then
-                    collFinTableProjects.Add Key:=arrVarFinanceTable(j, 0), Item:=arrVarFinanceTable(j, 0)
-                End If
-            Next j
-        
-        'get index of reporting month from fin table header
-            For j = 0 To UBound(arrVarFinanceHeader, 1)
-                If arrVarFinanceHeader(j) = Format(dtReportingPeriod, "MMM-YYYY") Then intFinTableTargetMonthIndex = j
+    ReDim arrVarActivityProjectList(0 To i - 1, 0 To 1) 'Size + 1 to add "Not Assigned"
+
+'For each activity get number of projects, redim project array, get project names, store project
+'array to activityproject array along with activity name
+    i = 0 'counter for activities
+    
+    For Each n In wsProjectList.Names
+        If GenericFunctions.StringSearch(1, n.Name, "Project.List_Activity.Name_") > 0 Then
+            
+            ReDim arrStrProjectList(0 To wsProjectList.Range(n).Rows.Count - 4)
+            
+            For j = 3 To wsProjectList.Range(n).Rows.Count - 1
+                arrStrProjectList(j - 3) = wsProjectList.Range(n)(j, 2).Value
             Next j
             
-        'loop months and sum values for rev/cost values for each project
-         For Each varFinTableProject In collFinTableProjects
-                For k = 0 To 1
-                    For j = 4 To intFinTableTargetMonthIndex
-                        If k = 1 Then strRevCost = "Revenue" Else strRevCost = "Costs"
-                            dblAmountUSD = 0
-                            For m = 0 To UBound(arrVarFinanceTable, 1)
-                                If arrVarFinanceTable(m, 0) = varFinTableProject And arrVarFinanceTable(m, 1) = strRevCost Then
-                                    If Not IsNull(arrVarFinanceTable(m, j)) Then dblAmountUSD = dblAmountUSD + arrVarFinanceTable(m, j)
-                                End If
-                            Next m
-                            
-                            Debug.Print i, objActivity.strName, varFinTableProject, strRevCost, dblAmountUSD
-                            
-'                            arrVarLcData(i, 0) = objActivity.strName
-'                            arrVarLcData(i, 1) = varFinTableProject
-'                            arrVarLcData(i, 2) = strRevCost
-'                            arrVarLcData(i, j - 1) = dblAmountUSD
-                    Next j
-                    i = i + 1
-                Next k
- 
+            ReDim Preserve arrStrProjectList(UBound(arrStrProjectList, 1) + 1)
+            arrStrProjectList(UBound(arrStrProjectList, 1)) = "Not Assigned"
+            
+            arrVarActivityProjectList(i, 0) = wsProjectList.Range(n)(1, 2).Value
+            arrVarActivityProjectList(i, 1) = arrStrProjectList
 
-        Next varFinTableProject
-                            
+            i = i + 1
         
-    End If
-Next nmeProjectListActivity
+        End If
+    Next n
+    
+GetProjectAndActivitiesFromProjectListWs = arrVarActivityProjectList
         
-
 End Function
+
+
+

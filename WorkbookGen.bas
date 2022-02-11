@@ -20,7 +20,7 @@ Set collPafWorkbooks = New Collection
 'home path "C:\Users\Blake\OneDrive\98 Misc\Special Assignments\UPSFIN\Project UPSFIN\PAF Workbooks\"
 'work path "C:\Users\blake_fudge\OneDrive - SGS\Ops\Misc\Special Assignments\UPSFIN\Project UPSFIN\PAF Workbooks\"
 
-strSavePath = "C:\Users\Blake\OneDrive\98 Misc\Special Assignments\UPSFIN\Project UPSFIN\PAF Workbooks\"
+strSavePath = "C:\Users\blake_fudge\OneDrive - SGS\Ops\Misc\Special Assignments\UPSFIN\Project UPSFIN\PAF Workbooks\"
 
 'Main loop for each P&L in collection
     For Each objPl In collPls
@@ -34,7 +34,7 @@ strSavePath = "C:\Users\Blake\OneDrive\98 Misc\Special Assignments\UPSFIN\Projec
             AllocationsWorksheet.PopulateAllocationsWorksheet wbPaf, dtReportingPeriod, objPl, collActivities
             
         'write to lc forecast worksheet
-            LcForecastWorksheet2.GenerateLcArray2 wbPaf, objPl, dtReportingPeriod, collActivities
+            LcForecastWorksheet.Main wbPaf, objPl, dtReportingPeriod, collActivities
             
         
     
@@ -107,3 +107,4 @@ For Each wbPaf In collPafWorkbooks
 Next wbPaf
 
 End Sub
+
