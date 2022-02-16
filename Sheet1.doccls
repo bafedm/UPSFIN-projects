@@ -1,1 +1,16 @@
 ﻿Option Explicit
+
+Private Sub CommandButton1_Click()
+
+
+Dim wb As Workbook
+Dim ws As Worksheet
+Dim pt As PivotTable
+
+Set wb = ThisWorkbook
+Set ws = wb.Worksheets("DM Pivot")
+Set pt = ws.PivotTables("ptTestTable")
+
+Debug.Print pt.MDX
+
+End Sub

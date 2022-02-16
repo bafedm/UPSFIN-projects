@@ -1,6 +1,8 @@
 Attribute VB_Name = "Main"
 Option Explicit
 
+
+
 '@Folder("Main")
 '@Description "Main Loop"
 
@@ -8,7 +10,7 @@ Sub Main()
 
 'UPSFIN Workbook Objects
     Dim wbUpsfin            As Workbook:    Set wbUpsfin = ThisWorkbook
-    Dim wsProjectWb         As Worksheet:   Set wsProjectWb = wbUpsfin.Worksheets("Project WB Generator")
+    Dim wsProjectWb         As Worksheet:   Set wsProjectWb = wbUpsfin.Worksheets(WS_PAF_GEN)
 
 'Global Variables from UPSFIN Workbook
     Dim dtReportingPeriod   As Date

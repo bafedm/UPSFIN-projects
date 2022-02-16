@@ -99,8 +99,7 @@ Dim arrVarMasterList As Variant
     
 'Change desc_group to numbers based on custom sort order
     Dim arrVarDescGroupOrder As Variant
-    arrVarDescGroupOrder = Array("Revenue", "Personnel Costs", "External Services", "Travel & Vehicles", "Depreciation", _
-                            "Operating Expense - 3rd Party", "Operating Expense - Group", "Split Overhead & Dir. & Ind. Costs")
+    arrVarDescGroupOrder = ARRAY_DESC_GROUPS
     
     For i = 0 To UBound(arrVarMasterList, 1)
         For j = 0 To UBound(arrVarDescGroupOrder, 1)

@@ -170,19 +170,52 @@ Dim strMdxPath                  As String                       'Mdx path for da
 'Values: [Measures].[(PROJ) BU Upstream P&Ls Amount USD]
 
 'Set Mdx path
-    strMdxPath = "SELECT NON EMPTY Hierarchize({[d_Cal_accPeriod].[MMM-YYYY].[MMM-YYYY].AllMembers}) " & _
+    'strMdxPath = "SELECT NON EMPTY Hierarchize({[dm_d_AccountingPeriod_Calendar].[MMM-YYYY].[MMM-YYYY].AllMembers}) " & _
         "DIMENSION PROPERTIES PARENT_UNIQUE_NAME,MEMBER_VALUE,HIERARCHY_UNIQUE_NAME ON COLUMNS , " & _
-        "NON EMPTY Hierarchize(CrossJoin({[co_f_busUnitsAndProjects].[Project_Name].[Project_Name].AllMembers}," & _
-        "{([dm_tbl_revCostRelationship].[Rev_Cost].[Rev_Cost].AllMembers,[tbl_d_DescGroup].[Desc_Group].[Desc_Group].AllMembers," & _
-        "[co_f_busUnitsAndProjects].[Description].[Description].AllMembers)}))" & _
+        "NON EMPTY Hierarchize(CrossJoin({[q_dm_BU_CY_PY].[Project_Name].[Project_Name].AllMembers}," & _
+        "{([tbl_d_AC_DescGroupRanges].[RevCost_Groups].[RevCost_Groups].AllMembers,[tbl_d_AC_DescGroupRanges].[Desc_Groups].[Desc_Groups].AllMembers," & _
+        "[q_dm_BU_CY_PY].[Description].[Description].AllMembers)}))" & _
         "DIMENSION PROPERTIES PARENT_UNIQUE_NAME,MEMBER_VALUE,HIERARCHY_UNIQUE_NAME ON ROWS  " & _
-        "FROM [Model] WHERE ([d_Cal_reportMonth].[MMM-YY].&[" & _
-        Format(dtReportingPeriod, "MMM-YY") & _
-        "],[co_d_PL_toTCodeFilter].[PL_Name].&[" & _
+        "FROM [Model] WHERE ([dm_d_ReportingPeriod_Calendar].[MMM-YY].&[" & _
+        Format(dtReportingPeriod, "MMM-YYYY") & _
+        "],[q_co_PlRanges].[PL_Name].&[" & _
         strPlName & _
         "],[d_tbl_tCodeNamesActivity].[Activity_Name].&[" & _
         strActivityName & _
-        "],[Measures].[(PROJ) BU Upstream P&Ls Amount USD]) CELL PROPERTIES VALUE, FORMAT_STRING, LANGUAGE, BACK_COLOR, FORE_COLOR, FONT_FLAGS"
+        "],[Measures].[(BU PL) Description Grouping Amount USD]) CELL PROPERTIES VALUE, FORMAT_STRING, LANGUAGE, BACK_COLOR, FORE_COLOR, FONT_FLAGS"
+
+    'strMdxPath = "SELECT NON EMPTY Hierarchize({DrilldownLevel({[dm_d_AccountingPeriod_Calendar].[MMM-YYYY].[All]},,,INCLUDE_CALC_MEMBERS)}) " & _
+"DIMENSION PROPERTIES PARENT_UNIQUE_NAME,MEMBER_VALUE,HIERARCHY_UNIQUE_NAME ON COLUMNS , " & _
+"NON EMPTY Hierarchize(DrilldownMember(DrilldownMember(DrilldownMember(CrossJoin({[q_dm_BU_CY_PY].[Project_Name].[All],[q_dm_BU_CY_PY].[Project_Name].[Project_Name].AllMembers}, " & _
+"{([tbl_d_AC_DescGroupRanges].[RevCost_Groups].[All],[tbl_d_AC_DescGroupRanges].[Desc_Groups].[All],[q_dm_BU_CY_PY].[Description].[All])}), " & _
+"[q_dm_BU_CY_PY].[Project_Name].[Project_Name].AllMembers, [tbl_d_AC_DescGroupRanges].[RevCost_Groups]), " & _
+"[tbl_d_AC_DescGroupRanges].[RevCost_Groups].[RevCost_Groups].AllMembers, [tbl_d_AC_DescGroupRanges].[Desc_Groups]), " & _
+"[tbl_d_AC_DescGroupRanges].[Desc_Groups].[Desc_Groups].AllMembers, [q_dm_BU_CY_PY].[Description])) " & _
+"DIMENSION PROPERTIES PARENT_UNIQUE_NAME,MEMBER_VALUE,HIERARCHY_UNIQUE_NAME ON ROWS  FROM [Model] WHERE " & _
+"([dm_d_ReportingPeriod_Calendar].[MMM-YYYY].&[Apr-2021],[q_co_PlRanges].[PL_Name].&[OMAN],[d_tbl_tCodeNamesActivity].[Activity_Name].&[OXY-EPF OMU+OMS]," & _
+"[Measures].[(BU PL) Description Grouping Amount USD]) CELL PROPERTIES VALUE, FORMAT_STRING, LANGUAGE, BACK_COLOR, FORE_COLOR, FONT_FLAGS"
+
+strMdxPath = "SELECT NON EMPTY Hierarchize({DrilldownLevel({[dm_d_AccountingPeriod_Calendar].[MMM-YYYY].[All]},,,INCLUDE_CALC_MEMBERS)}) " & _
+    "DIMENSION PROPERTIES PARENT_UNIQUE_NAME,MEMBER_VALUE,HIERARCHY_UNIQUE_NAME ON COLUMNS , " & _
+    "NON EMPTY Hierarchize(DrilldownMember(DrilldownMember(DrilldownMember(CrossJoin({[q_dm_BU_CY_PY].[Project_Name].[All],[q_dm_BU_CY_PY].[Project_Name].[Project_Name].AllMembers}, " & _
+    "{([tbl_d_AC_DescGroupRanges].[RevCost_Groups].[All],[tbl_d_AC_DescGroupRanges].[Desc_Groups].[All],[q_dm_BU_CY_PY].[Description].[All])}), " & _
+    "[q_dm_BU_CY_PY].[Project_Name].[Project_Name].AllMembers, [tbl_d_AC_DescGroupRanges].[RevCost_Groups]), " & _
+    "[tbl_d_AC_DescGroupRanges].[RevCost_Groups].[RevCost_Groups].AllMembers, [tbl_d_AC_DescGroupRanges].[Desc_Groups]), " & _
+    "[tbl_d_AC_DescGroupRanges].[Desc_Groups].[Desc_Groups].AllMembers, [q_dm_BU_CY_PY].[Description])) DIMENSION PROPERTIES PARENT_UNIQUE_NAME,MEMBER_VALUE,HIERARCHY_UNIQUE_NAME ON ROWS  FROM [Model] " & _
+    "WHERE ([dm_d_ReportingPeriod_Calendar].[MMM-YYYY].&[" & _
+    Format(dtReportingPeriod, "MMM-YYYY") & _
+    "],[q_co_PlRanges].[PL_Name].&[" & _
+    strPlName & _
+    "],[d_tbl_tCodeNamesActivity].[Activity_Name].&[" & _
+    strActivityName & _
+    "],[Measures].[(BU PL) Description Grouping Amount USD]) CELL PROPERTIES VALUE, FORMAT_STRING, LANGUAGE, BACK_COLOR, FORE_COLOR, FONT_FLAGS"
+  
+  
+
+
+
+
+
 
 'Call function to get table data and return to caller
     Set GetFinanceDataHeaderAndTableFromDm = GetTableDataFromDataModel(wbUpsfin, strMdxPath)
@@ -305,13 +338,33 @@ Dim arrVarTableDataFromDm()   As Variant                        'return array, 2
 'Values: [Measures].[(PROJ) BU Upstream P&Ls Amount USD]
 
 'Set MDX
-    strMdxPath = "SELECT NON EMPTY Hierarchize(CrossJoin({[d_tbl_tCodeNamesActivity].[Activity_Name].[Activity_Name].AllMembers}, " & _
+    'strMdxPath = "SELECT NON EMPTY Hierarchize(CrossJoin({[d_tbl_tCodeNamesActivity].[Activity_Name].[Activity_Name].AllMembers}, " & _
         "{([co_d_PL_toTCodeFilter].[PL_Name].[PL_Name].AllMembers)})) DIMENSION PROPERTIES PARENT_UNIQUE_NAME,MEMBER_VALUE,HIERARCHY_UNIQUE_NAME ON COLUMNS  " & _
         "FROM [Model] WHERE ([d_Cal_reportMonth].[MMM-YY].&[" & _
         Format(dtReportingPeriod, "MMM-YY") & _
         "],[d_Cal_accPeriod].[MMM-YYYY].&[" & _
         Format(dtReportingPeriod, "MMM-YYYY") & _
         "],[Measures].[(PROJ) BU Upstream P&Ls Amount USD]) CELL PROPERTIES VALUE, FORMAT_STRING, LANGUAGE, BACK_COLOR, FORE_COLOR, FONT_FLAGS"
+        
+    strMdxPath = "SELECT NON EMPTY Hierarchize(CrossJoin({[d_tbl_tCodeNamesActivity].[Activity_Name].[Activity_Name].AllMembers}, " & _
+        "{([q_co_PlRanges].[PL_Name].[PL_Name].AllMembers)})) DIMENSION PROPERTIES PARENT_UNIQUE_NAME,MEMBER_VALUE,HIERARCHY_UNIQUE_NAME ON COLUMNS  " & _
+        "FROM [Model] WHERE ([dm_d_ReportingPeriod_Calendar].[MMM-YYYY].&[" & _
+        Format(dtReportingPeriod, "MMM-YYYY") & _
+        "],[dm_d_AccountingPeriod_Calendar].[MMM-YYYY].&[" & _
+        Format(dtReportingPeriod, "MMM-YYYY") & _
+        "],[Measures].[(BU PL) Description Grouping Amount USD]) CELL PROPERTIES VALUE, FORMAT_STRING, LANGUAGE, BACK_COLOR, FORE_COLOR, FONT_FLAGS"
+        
+    'strMdxPath = "SELECT NON EMPTY Hierarchize(DrilldownMember(CrossJoin({[d_tbl_tCodeNamesActivity].[Activity_Name].[All]," & _
+        "[d_tbl_tCodeNamesActivity].[Activity_Name].[Activity_Name].AllMembers}, {([q_co_PlRanges].[PL_Name].[All])}), " & _
+        "[d_tbl_tCodeNamesActivity].[Activity_Name].[Activity_Name].AllMembers, [q_co_PlRanges].[PL_Name])) " & _
+        "DIMENSION PROPERTIES PARENT_UNIQUE_NAME,MEMBER_VALUE,HIERARCHY_UNIQUE_NAME ON COLUMNS  FROM [Model] WHERE " & _
+        "([dm_d_ReportingPeriod_Calendar].[MMM-YYYY].&[" & _
+        Format(dtReportingPeriod, "MMM-YYYY") & _
+        "],[dm_d_AccountingPeriod_Calendar].[MMM-YYYY].&[" & _
+        Format(dtReportingPeriod, "MMM-YYYY") & _
+        "],[Measures].[(BU PL) Description Grouping Amount USD]) CELL PROPERTIES VALUE, FORMAT_STRING, LANGUAGE, BACK_COLOR, FORE_COLOR, FONT_FLAGS"
+
+
         
 'Call function to return data from data model, store in dictionary
     Set dictDmReturnData = GetTableDataFromDataModel(wbUpsfin, strMdxPath)
