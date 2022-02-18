@@ -200,22 +200,27 @@ intRowOffset = 1
     End If
     
 'Write month column headers based on current year
-    PAFCellFormats.FormatLcMonthColumnHeader Range(rngLocalAnchor(intRowOffset, intMonthStartCol), rngLocalAnchor(intRowOffset, intMonthStartCol + 11))
+    PAFCellFormats.FormatLcMonthColumnHeader _
+        Range(rngLocalAnchor(intRowOffset, intMonthStartCol), rngLocalAnchor(intRowOffset, intMonthStartCol + 11))
     For i = 1 To 12
         rngLocalAnchor(intRowOffset, intMonthStartCol + (i - 1)).Value = MonthName(i, True) & "-" & Year(dtReportingDate)
     Next i
     intRowOffset = intRowOffset + 1
     
 'Write Row Header Titles
-    rngLocalAnchor(intRowOffset, 0) = "Actual"
-    rngLocalAnchor(intRowOffset + 5, 0) = "Forecast"
+    rngLocalAnchor(intRowOffset, 1) = "Actual"
+        LcForecastMergeRowHeaderTitle rngLocalAnchor(intRowOffset, 1)
+        
+    rngLocalAnchor(intRowOffset + 5, 1) = "Forecast"
+        LcForecastMergeRowHeaderTitle rngLocalAnchor(intRowOffset + 5, 1)
 
 'Write Row Headers
     For i = 1 To 2
-        rngLocalAnchor((intRowOffset), 1) = "Revenue"
-        rngLocalAnchor((intRowOffset) + 1, 1) = "Cost"
-        rngLocalAnchor((intRowOffset) + 2, 1) = "LC"
-        rngLocalAnchor((intRowOffset) + 3, 1) = "LC%"
+        rngLocalAnchor((intRowOffset), 2) = "Revenue"
+        rngLocalAnchor((intRowOffset) + 1, 2) = "Cost"
+        rngLocalAnchor((intRowOffset) + 2, 2) = "LC"
+        rngLocalAnchor((intRowOffset) + 3, 2) = "LC%"
+        PAFCellFormats.FormatAmountUsd Range(rngLocalAnchor((intRowOffset), intMonthStartCol), rngLocalAnchor((intRowOffset) + 3, intMonthStartCol + 11)), 11
         If i = 1 Then intRowOffset = intRowOffset + 5 Else intRowOffset = intRowOffset + 3
     Next i
     
@@ -228,6 +233,16 @@ intRowOffset = 1
 writeBlankTable = intRowOffset
 
 End Function
+
+'@Description "Merges and applies formatting for the Row Header Title"
+Private Sub LcForecastMergeRowHeaderTitle( _
+                                                rngTopCell As Range)
+                                                
+Range(rngTopCell, rngTopCell(4, 1)).Merge
+PAFCellFormats.FormatLcRowHeaderTitle Range(rngTopCell, rngTopCell(4, 1))
+
+
+End Sub
 
 '@Description "Calculates, generates name, and sets a named range for caller table"
 Private Sub SetTableRange( _

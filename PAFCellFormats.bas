@@ -159,15 +159,18 @@ End Sub
                         
 '@Description "sets formatting for cells containing dollar figures"
 Sub FormatAmountUsd( _
-                        ByRef rngTarget As Range)
+                        ByRef rngTarget As Range, _
+                        Optional intFontSize As Integer = 10)
                                             
 With rngTarget
     .ClearFormats
     .Font.Name = "Calibri"
-    .Font.Size = 10
+    .Font.Size = intFontSize
     .Font.Color = vbBlack
     .NumberFormat = "_-$* #,##0.00_-;-$* #,##0.00_-;_-$* "" - ""??_-;_-@_-"
 End With
+
+PAFCellFormats.FormatAllBordersWhiteThin rngTarget
 
 End Sub
 
@@ -184,7 +187,22 @@ With rngTarget
     .NumberFormat = "MMM-YY"
 End With
 
-
 End Sub
                         
+Sub FormatLcRowHeaderTitle( _
+                            ByRef rngTarget As Range)
+With rngTarget
+    .HorizontalAlignment = xlRight
+    .VerticalAlignment = xlCenter
+    .WrapText = False
+    .Orientation = 90
+    .Font.Name = "Calibri"
+    .Font.Size = 11
+    .Font.Color = vbBlack
+End With
 
+
+                            
+
+
+End Sub
