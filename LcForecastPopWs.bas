@@ -66,7 +66,7 @@ For i = 0 To UBound(arrVarPlTotalsByProject, 1)
     For j = 0 To UBound(arrVarPlTotalsByProject(i, 1), 1)
         For Each n In wsLcForecast.Names
             If GenericFunctions.StringSearch(1, n.Name, GenericFunctions.replaceIllegalNamedRangeCharacters(arrVarPlTotalsByProject(i, 1)(j, 0))) > 0 Then
-                Set rngLcTableAmountAnchor = Range(n)(4, 3)
+                Set rngLcTableAmountAnchor = Range(n)(4, 4)
                 For k = 0 To intTargetMonth - 1
                     For m = 0 To 1
                         rngLcTableAmountAnchor(m + 1, k).Value = arrVarPlTotalsByProject(i, 1)(j, 1)(k + 1, m)
@@ -115,7 +115,7 @@ Dim intTableRowOffset       As Integer
 'Constants
     intLcTableRowOffset = 2
     intPlTableRowOffset = 11
-    intMonthStartCol = 2
+    intMonthStartCol = 3
     'intRowHeaderStartRow = 3  (probably not required)
 
 
@@ -175,26 +175,32 @@ Dim intRowOffset As Integer
 intRowOffset = 1
 
 'Write Activity Header
-    rngLocalAnchor(intRowOffset, 0) = "Activity Name"
-    rngLocalAnchor(intRowOffset, 2) = strActivityName
+    rngLocalAnchor(intRowOffset, 1) = "Activity Name"
+    PAFCellFormats.FormatProjectListHeaderActivityTitle rngLocalAnchor(intRowOffset, 1)
+    PAFCellFormats.FormatAllBordersWhiteThin rngLocalAnchor(intRowOffset, 1)
+    rngLocalAnchor(intRowOffset, 3) = strActivityName
     intRowOffset = intRowOffset + 1
     
 'Write Project Header if present
     If Not strProjectName = "" Then
-        rngLocalAnchor(intRowOffset, 0) = "Project Name"
+        rngLocalAnchor(intRowOffset, 1) = "Project Name"
+        PAFCellFormats.FormatProjectListHeaderActivityTitle rngLocalAnchor(intRowOffset, 1)
+        PAFCellFormats.FormatAllBordersWhiteThin rngLocalAnchor(intRowOffset, 1)
         
         'Because "Not Assigned" shows up multiple times we need to a special activity+not assigned named range
         'this doesnt look good in the ws so we override the typical naming from the array with fixed value when
         '"Not Assigned" is found in the project name array
             If GenericFunctions.StringSearch(1, strProjectName, "Not Assigned") Then
-                rngLocalAnchor(intRowOffset, 2) = "Not Assigned"
+                rngLocalAnchor(intRowOffset, 3) = "Not Assigned"
             Else
-                rngLocalAnchor(intRowOffset, 2) = strProjectName
+                rngLocalAnchor(intRowOffset, 3) = strProjectName
             End If
+            
         intRowOffset = intRowOffset + 1
     End If
     
 'Write month column headers based on current year
+    PAFCellFormats.FormatLcMonthColumnHeader Range(rngLocalAnchor(intRowOffset, intMonthStartCol), rngLocalAnchor(intRowOffset, intMonthStartCol + 11))
     For i = 1 To 12
         rngLocalAnchor(intRowOffset, intMonthStartCol + (i - 1)).Value = MonthName(i, True) & "-" & Year(dtReportingDate)
     Next i

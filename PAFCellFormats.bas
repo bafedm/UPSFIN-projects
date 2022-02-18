@@ -170,5 +170,21 @@ With rngTarget
 End With
 
 End Sub
+
+'@Description "set formatting for LC Allocation Column Header Month"
+Sub FormatLcMonthColumnHeader( _
+                                ByRef rngTarget As Range)
+                                
+With rngTarget
+    .ClearContents
+    .Font.Name = "Calibri"
+    .Font.Size = 11
+    .Font.Color = vbBlack
+    .HorizontalAlignment = xlCenter
+    .NumberFormat = "MMM-YY"
+End With
+
+
+End Sub
                         
 
