@@ -174,6 +174,22 @@ PAFCellFormats.FormatAllBordersWhiteThin rngTarget
 
 End Sub
 
+'@Description "set formatting for LC% cells"
+Sub FormatLcPercentage( _
+                        ByRef rngTarget As Range)
+With rngTarget
+    .ClearFormats
+    .Font.Name = "Calibri"
+    .Font.Size = 11
+    .Font.Color = vbBlack
+    .NumberFormat = "0.00%"
+End With
+
+PAFCellFormats.FormatAllBordersWhiteThin rngTarget
+            
+
+End Sub
+
 '@Description "set formatting for LC Allocation Column Header Month"
 Sub FormatLcMonthColumnHeader( _
                                 ByRef rngTarget As Range)

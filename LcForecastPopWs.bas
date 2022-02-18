@@ -220,7 +220,13 @@ intRowOffset = 1
         rngLocalAnchor((intRowOffset) + 1, 2) = "Cost"
         rngLocalAnchor((intRowOffset) + 2, 2) = "LC"
         rngLocalAnchor((intRowOffset) + 3, 2) = "LC%"
-        PAFCellFormats.FormatAmountUsd Range(rngLocalAnchor((intRowOffset), intMonthStartCol), rngLocalAnchor((intRowOffset) + 3, intMonthStartCol + 11)), 11
+        
+        'Apply amount USD/percentage formatting for the montly values
+            PAFCellFormats.FormatAmountUsd _
+                        Range(rngLocalAnchor((intRowOffset), intMonthStartCol), rngLocalAnchor((intRowOffset) + 2, intMonthStartCol + 11)), 11
+            PAFCellFormats.FormatLcPercentage _
+                    Range(rngLocalAnchor((intRowOffset) + 3, intMonthStartCol), rngLocalAnchor((intRowOffset) + 3, intMonthStartCol + 11))
+        
         If i = 1 Then intRowOffset = intRowOffset + 5 Else intRowOffset = intRowOffset + 3
     Next i
     
