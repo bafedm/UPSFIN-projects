@@ -43,11 +43,9 @@ Dim arrVarPlTotals              As Variant      '2d array of months, (0)Rev Amou
     
 'Populate arrVarPlTotalsByProject array
     arrVarPlTotalsByProject = GenerateProjectPlSubTotals(objPl, dtReportingPeriod, collActivities, arrVarActivityProjectList)
-    
-
-    
+       
 'Populate worksheet
-
+    LcForecastPopWs.WriteToLcWorksheet objPl, wbPaf, arrVarPlTotalsByProject, dtReportingPeriod
 
 
 

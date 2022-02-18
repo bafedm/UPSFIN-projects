@@ -72,16 +72,6 @@ Dim arrVarPlNamesFromDm As Variant
 'Values items: [Measures].[(PROJ) BU Upstream P&Ls Amount USD]
 
 'Set MDX
-    'strMdxPath = _
-        "SELECT NON EMPTY Hierarchize({[co_d_PL_toTCodeFilter].[PL_Name].[PL_Name].AllMembers}) " & _
-        "DIMENSION PROPERTIES PARENT_UNIQUE_NAME,MEMBER_VALUE,HIERARCHY_UNIQUE_NAME ON COLUMNS  " & _
-        "FROM [Model] WHERE ([d_Cal_reportMonth].[MMM-YY].&[" & _
-        Format(dtReportingPeriod, "MMM-YY") & _
-        "],[d_Cal_accPeriod].[MMM-YYYY].&[" & _
-        Format(dtReportingPeriod, "MMM-YYYY") & _
-        "],[Measures].[(PROJ) BU Upstream P&Ls Amount USD]) " & _
-        "CELL PROPERTIES VALUE, FORMAT_STRING, LANGUAGE, BACK_COLOR, FORE_COLOR, FONT_FLAGS"
-        
     strMdxPath = "SELECT NON EMPTY Hierarchize({[q_co_PlRanges].[PL_Name].[PL_Name].AllMembers}) " & _
                 "DIMENSION PROPERTIES PARENT_UNIQUE_NAME,MEMBER_VALUE,HIERARCHY_UNIQUE_NAME ON COLUMNS  " & _
                 "FROM [Model] WHERE ([dm_d_AccountingPeriod_Calendar].[MMM-YYYY].&[Apr-2021]," & _
@@ -89,9 +79,6 @@ Dim arrVarPlNamesFromDm As Variant
                 "[Measures].[(BU PL) Description Grouping Amount USD]) " & _
                 "CELL PROPERTIES VALUE, FORMAT_STRING, LANGUAGE, BACK_COLOR, FORE_COLOR, FONT_FLAGS"
     
-
-        
-        
 
 'Call function to return data from data model, store in dictionary
     Set dictDmReturnData = GetTableDataFromDataModel(wbUpsfin, strMdxPath)

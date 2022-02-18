@@ -43,7 +43,6 @@ Dim nmeProjectListActivity              As Variant      'Named ranges from the P
             
             'Write the activity header cells
                 WriteActivityAllocationHeader rngLeftAnchor.Offset(0, intAllocationsOffsetLeft)
-                
           
             'Write and format the activity name
                 PAFCellFormats.FormatAllocationsDGDListFontDefault rngLeftAnchor.Offset(2, intAllocationsOffsetLeft)
