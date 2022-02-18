@@ -166,7 +166,11 @@ Dim strRevCost                      As String
         For j = 0 To UBound(arrVarActivityProjectList(i, 1), 1) 'Project loop
             
             'Assign Project Name
-                arrVarProjectList(j, 0) = arrVarActivityProjectList(i, 1)(j)
+                If arrVarActivityProjectList(i, 1)(j) = "Not Assigned" Then
+                    arrVarProjectList(j, 0) = arrVarActivityProjectList(i, 0) & " " & arrVarActivityProjectList(i, 1)(j)
+                Else
+                    arrVarProjectList(j, 0) = arrVarActivityProjectList(i, 1)(j)
+                End If
             
             'Resize/reset Month/Amount USD array
                 ReDim arrVarPlMonthlyRevCostTotals(1 To Month(dtReportingPeriod) - 1, 0 To 1)

@@ -70,6 +70,7 @@ For i = 0 To UBound(arrVarPlTotalsByProject, 1)
                 For k = 0 To intTargetMonth - 1
                     For m = 0 To 1
                         rngLcTableAmountAnchor(m + 1, k).Value = arrVarPlTotalsByProject(i, 1)(j, 1)(k + 1, m)
+                        Debug.Print arrVarPlTotalsByProject(i, 0), arrVarPlTotalsByProject(i, 1)(j, 0), arrVarPlTotalsByProject(i, 1)(j, 1)(k + 1, m)
                     Next m 'rev/cost
                 Next k ' monhts
             End If
@@ -181,7 +182,15 @@ intRowOffset = 1
 'Write Project Header if present
     If Not strProjectName = "" Then
         rngLocalAnchor(intRowOffset, 0) = "Project Name"
-        rngLocalAnchor(intRowOffset, 2) = strProjectName
+        
+        'Because "Not Assigned" shows up multiple times we need to a special activity+not assigned named range
+        'this doesnt look good in the ws so we override the typical naming from the array with fixed value when
+        '"Not Assigned" is found in the project name array
+            If GenericFunctions.StringSearch(1, strProjectName, "Not Assigned") Then
+                rngLocalAnchor(intRowOffset, 2) = "Not Assigned"
+            Else
+                rngLocalAnchor(intRowOffset, 2) = strProjectName
+            End If
         intRowOffset = intRowOffset + 1
     End If
     
@@ -238,7 +247,12 @@ Dim strRangeName As String
     If strProjectName = "" Then
         strRangeName = "Lc.Forecasts_Activity.Name_" & GenericFunctions.replaceIllegalNamedRangeCharacters(strActivityName)
     Else
-        strRangeName = "Lc.Forecasts_Project.Name_" & GenericFunctions.replaceIllegalNamedRangeCharacters(strProjectName)
+        If strProjectName = "Not Assigned" Then
+            strRangeName = "Lc.Forecasts_Project.Name_" & GenericFunctions.replaceIllegalNamedRangeCharacters(strActivityName) & _
+                            "_" & GenericFunctions.replaceIllegalNamedRangeCharacters(strProjectName)
+        Else
+            strRangeName = "Lc.Forecasts_Project.Name_" & GenericFunctions.replaceIllegalNamedRangeCharacters(strProjectName)
+        End If
     End If
 
 'Set named range
