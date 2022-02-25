@@ -22,6 +22,9 @@ Dim wsAllocations As Worksheet
     Set wsLcForecast = wbPaf.Worksheets("LC Forecast")
     Set wsAllocations = wbPaf.Worksheets("Allocations")
     
+'Write ws header
+    GenericFunctions.writeProjectHeadersToPafWorksheet wsLcForecast, dtReportingPeriod, objPl.strName, "Lc.Forecast"
+    
 'Write activity/project blank tables and set range names
     WriteBlankTablesToLcWorksheet objPl, wsLcForecast, arrVarPlTotalsByProject, dtReportingPeriod
     
@@ -54,10 +57,6 @@ Private Sub WriteFormulasToTables( _
 Dim i As Long, j As Long, k As Long
 Dim n As Name
 Dim rngLocalAnchor As Range
-Dim arrVarProjectRangeNames As Variant
-Dim strRevenueSumFormula As String
-Dim strCostsSumFormula As String
-
 
 For Each n In wsLcForecast.Names
     Debug.Print n.Name
@@ -68,36 +67,65 @@ For Each n In wsLcForecast.Names
                 WriteLcFormulasToTable Range(rngLocalAnchor(8, i), rngLocalAnchor(9, i))
             Next i
         ElseIf GenericFunctions.StringSearch(1, n.Name, "Lc.Forecasts_Activity.Name_") > 0 Then
-            'get activity proper name from ws table
-            'get list of projects from array
-            'loop worksheet names again and generate string of ranges
-            'write to activity table month
-            Set rngLocalAnchor = Range(n)(3, 4)
-            arrVarProjectRangeNames = GetArrayOfProjectRangeNames(arrVarPlTotalsByProject, Range(n)(1, 3).Value)
-            
-            For i = 0 To Month(dtReportingPeriod)
-                strRevenueSumFormula = "=SUM("
-                strCostsSumFormula = "=SUM("
-                For j = 0 To UBound(arrVarProjectRangeNames, 1)
-                    If Not IsEmpty(arrVarProjectRangeNames(j)) Then
-                        strRevenueSumFormula = strRevenueSumFormula & wsLcForecast.Range(arrVarProjectRangeNames(j))(4 + 0, 3 + i).Address & ","
-                        strCostsSumFormula = strCostsSumFormula & wsLcForecast.Range(arrVarProjectRangeNames(j))(4 + 1, 3 + i).Address & ","
-                    End If
-                Next j
-                strRevenueSumFormula = Left(strRevenueSumFormula, Len(strRevenueSumFormula) - 1) & ")"
-                rngLocalAnchor(1, i).Formula = strRevenueSumFormula
-                strCostsSumFormula = Left(strCostsSumFormula, Len(strCostsSumFormula) - 1) & ")"
-                rngLocalAnchor(2, i) = strCostsSumFormula
-                'write lc,lc%
-                    WriteLcFormulasToTable Range(rngLocalAnchor(3, i), rngLocalAnchor(4, i))
-            Next i
+            WriteNonProjectValuesToTables wsLcForecast, arrVarPlTotalsByProject, n, dtReportingPeriod
+        ElseIf GenericFunctions.StringSearch(1, n.Name, "LC.Forecast_Pl.Name_") > 0 Then
+            WriteNonProjectValuesToTables wsLcForecast, arrVarPlTotalsByProject, n, dtReportingPeriod, False
         End If
 Next n
 
 
 End Sub
 
-'@Description "return array of projects worksheet names based on activity"
+'@Description "Writes the Activity and PL formulas"
+Private Sub WriteNonProjectValuesToTables( _
+                                            ByRef wsLcForecast As Worksheet, _
+                                            ByVal arrVarPlTotalsByProject As Variant, _
+                                            ByRef nameActivityOrPlRange As Name, _
+                                            ByVal dtReportingPeriod As Date, _
+                                            Optional ByVal boolIsActivity As Boolean = True)
+Dim i As Long, j As Long, k As Long
+Dim arrVarProjectRangeNames As Variant
+Dim strRevenueSumFormula As String
+Dim strCostsSumFormula As String
+Dim rngLocalAnchor As Range
+Dim intRevCostRowOffset As Integer
+
+'get activity proper name from ws table
+'get list of projects from array
+'loop worksheet names again and generate string of ranges
+'write to activity table month
+
+Set rngLocalAnchor = Range(nameActivityOrPlRange)(3, 4)
+
+If boolIsActivity = True Then
+    arrVarProjectRangeNames = GetArrayOfProjectRangeNames(arrVarPlTotalsByProject, Range(nameActivityOrPlRange)(1, 3).Value)
+    intRevCostRowOffset = 4
+Else
+    arrVarProjectRangeNames = GetArrayOfActivityRangeNames(arrVarPlTotalsByProject)
+    intRevCostRowOffset = 3
+End If
+    
+For i = 0 To Month(dtReportingPeriod) - 1
+    strRevenueSumFormula = "=SUM("
+    strCostsSumFormula = "=SUM("
+    For j = 0 To UBound(arrVarProjectRangeNames, 1)
+        If Not IsEmpty(arrVarProjectRangeNames(j)) Then
+            strRevenueSumFormula = strRevenueSumFormula & wsLcForecast.Range(arrVarProjectRangeNames(j))(intRevCostRowOffset + 0, 3 + i).Address & ","
+            strCostsSumFormula = strCostsSumFormula & wsLcForecast.Range(arrVarProjectRangeNames(j))(intRevCostRowOffset + 1, 3 + i).Address & ","
+        End If
+    Next j
+    strRevenueSumFormula = Left(strRevenueSumFormula, Len(strRevenueSumFormula) - 1) & ")"
+    rngLocalAnchor(1, i).Formula = strRevenueSumFormula
+    strCostsSumFormula = Left(strCostsSumFormula, Len(strCostsSumFormula) - 1) & ")"
+    rngLocalAnchor(2, i) = strCostsSumFormula
+    'write lc,lc%
+        WriteLcFormulasToTable Range(rngLocalAnchor(3, i), rngLocalAnchor(4, i))
+Next i
+
+End Sub
+
+
+'@Description "return array of projects or activity worksheet names based on activity or Pl"
 Private Function GetArrayOfProjectRangeNames( _
                                         ByVal arrVarPlTotalsByProject As Variant, _
                                         ByVal strActivityName As String) As Variant
@@ -127,6 +155,26 @@ Next i
 GetArrayOfProjectRangeNames = arrStrProjectRangeNames
 
 End Function
+
+'@Description "return array of activity worksheet names based on Pl"
+Private Function GetArrayOfActivityRangeNames( _
+                                        ByVal arrVarPlTotalsByProject As Variant) _
+                                        As Variant
+
+Dim i As Long, j As Long, k As Long
+Dim arrStrActivityRangeNames() As Variant
+
+ReDim arrStrActivityRangeNames(UBound(arrVarPlTotalsByProject, 1))
+
+For i = 0 To UBound(arrStrActivityRangeNames, 1)
+    arrStrActivityRangeNames(i) = "Lc.Forecasts_Activity.Name_" & _
+            GenericFunctions.replaceIllegalNamedRangeCharacters(arrVarPlTotalsByProject(i, 0))
+Next i
+
+GetArrayOfActivityRangeNames = arrStrActivityRangeNames
+
+End Function
+
 
 '@Description "Writes the LC and LC% formulas to a give range"
 Private Sub WriteLcFormulasToTable( _
@@ -367,8 +415,7 @@ intAnchorRowOffset = (intLcTableRowOffset * 2) + intPlTableRowOffset
     
 'Set PL named range
     wsLcForecast.Names.Add Name:="LC.Forecast_Pl.Name_" & GenericFunctions.replaceIllegalNamedRangeCharacters(objPl.strName), _
-                                RefersTo:=Range(rngTopAnchor(2, 1), rngTopAnchor(12, intMonthStartCol + 11))
-
+                                RefersTo:=Range(rngTopAnchor(3, 1), rngTopAnchor(12, intMonthStartCol + 11))
     
 'loop activities
 '   write table for activity and set named range

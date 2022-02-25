@@ -128,8 +128,8 @@ Sub writeProjectHeadersToPafWorksheet( _
                                                 ByVal strPlName As String, _
                                                 ByVal strSheetName As String)
                                                 
-Range(strSheetName & "_Header_PL.Name").Value = strPlName
-Range(strSheetName & "_Header_Reporting.Month").Value = Format(dtReportingPeriod, "MMM-YYYY")
+ws.Range(strSheetName & "_Header_PL.Name").Value = strPlName
+ws.Range(strSheetName & "_Header_Reporting.Month").Value = Format(dtReportingPeriod, "MMM-YYYY")
 
 End Sub
 
