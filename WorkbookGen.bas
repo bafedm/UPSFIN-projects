@@ -17,10 +17,10 @@ Dim strSavePath         As String       'Path to store the PAF workbooks
 
 
 Set collPafWorkbooks = New Collection
-'home path "C:\Users\Blake\OneDrive\98 Misc\Special Assignments\UPSFIN\Project UPSFIN\PAF Workbooks\"
-'work path "C:\Users\blake_fudge\OneDrive - SGS\Ops\Misc\Special Assignments\UPSFIN\Project UPSFIN\PAF Workbooks\"
-
-strSavePath = "C:\Users\Blake\OneDrive\98 Misc\Special Assignments\UPSFIN\Project UPSFIN\PAF Workbooks\"
+'home path
+    'strSavePath = "C:\Users\Blake\OneDrive\98 Misc\Special Assignments\UPSFIN\Project UPSFIN\PAF Workbooks\"
+'work path
+    strSavePath = "C:\Users\blake_fudge\OneDrive - SGS\Ops\Misc\Special Assignments\UPSFIN\Project UPSFIN\PAF Workbooks\"
 
 'Main loop for each P&L in collection
     For Each objPl In collPls
