@@ -153,7 +153,6 @@ Dim i As Long, j As Long, k As Long, m As Long
 Dim intTargetMonth As Integer
 Dim n As Name
 Dim rngLcTableAmountAnchor As Range
-
                                     
 'loop activities
 '   loop projects
@@ -195,7 +194,11 @@ For i = 0 To UBound(arrVarPlTotalsByProject, 1)
                                                                         arrVarPlTotalsByProject(i, 1)(j, 0), _
                                                                         m)
                         Else
-                            
+                            rngLcTableAmountAnchor(m + 1, k).Value = GetRevCostTotalForNotAllocated( _
+                                                                        wsAllocations, _
+                                                                        arrVarPlTotalsByProject(i, 0), _
+                                                                        arrVarPlTotalsByProject(i, 1)(j, 1), _
+                                                                        m)
                         End If
                         'Debug.Print arrVarPlTotalsByProject(i, 0), arrVarPlTotalsByProject(i, 1)(j, 0), arrVarPlTotalsByProject(i, 1)(j, 1)(k + 1, m)
                     Next m 'rev/cost
@@ -206,6 +209,83 @@ For i = 0 To UBound(arrVarPlTotalsByProject, 1)
 Next i 'activity loop
 
 End Sub
+
+'@Description "Returns a Rev/Cost total for "not allocated" amounts based on Allocations WS input"
+Private Function GetRevCostTotalForNotAllocated( _
+                                            ByRef wsAllocations As Worksheet, _
+                                            ByVal strActivityName As String, _
+                                            ByVal arrVarProjects As Variant, _
+                                            ByVal intRevCostIndicator As Integer _
+                                            ) As Variant
+                        
+'Get activity range on allocations ws
+'set projects range by calculating activity range width
+'set criteria range
+'set activity total range
+'generate [activity total] formula for rev/cost using criteria range and activity total range
+'generate [allocated] formula for rev/cost using criteria range and projects range
+'typical function format:
+'   =SUMPRODUCT((([criteria range]=[critera_1])+([criteria range]=[critera_2])+...)*[sum range])
+'general unallocated calculation:
+'   unallocated = [activity total] - [allocated]
+
+Dim i As Long, j As Long, k As Long
+Dim rngActivity As Range
+Dim rngProjects As Range
+Dim rngActivityCriteria As Range
+Dim rngActivityTotals As Range
+Dim intProjectsCount As Integer
+Dim arrVarCriteria As Variant
+Dim strActivityTotalsFunction As String
+Dim strProjectsTotalsFunction As String
+
+'Set rev/cost criteria from constant
+    If intRevCostIndicator = 0 Then arrVarCriteria = ARRAY_DESC_GROUPS_REV Else arrVarCriteria = ARRAY_DESC_GROUPS_COSTS
+
+'Get number of projects from PlTotals array that are not "Not Allocated"
+'    intProjectsCount = 0
+'    For i = 0 To UBound(arrVarProjects, 1)
+'        If GenericFunctions.StringSearch(1, arrVarProjects(i), "Not Allocated") = 0 Then intProjectsCount = intProjectsCount + 1
+'    Next i
+
+'Set activity range
+    Set rngActivity = wsAllocations.Range("Allocations_Activity.Name_" & GenericFunctions.replaceIllegalNamedRangeCharacters(strActivityName))
+    
+'Calculate Projects Range and set
+    Set rngProjects = Range(rngActivity(3, 6), rngActivity(rngActivity.Rows.Count, rngActivity.Columns.Count - 1))
+
+'Set Criteria Range
+    Set rngActivityCriteria = Range(rngActivity(3, 1), rngActivity(rngActivity.Rows.Count, 1))
+
+'Set Activity Total Amount range
+    Set rngActivityTotals = Range(rngActivity(3, 3), rngActivity(rngActivity.Rows.Count, 3))
+    
+'Generate functions
+    strActivityTotalsFunction = "SUMPRODUCT(("
+    strProjectsTotalsFunction = "SUMPRODUCT(("
+    For i = 0 To UBound(arrVarCriteria, 1)
+        strActivityTotalsFunction = strActivityTotalsFunction & _
+                                    "(" & _
+                                    rngActivityCriteria.Address(, , , True) & _
+                                    "=" & _
+                                    """" & arrVarCriteria(i) & """" & _
+                                    ")+"
+        strProjectsTotalsFunction = strProjectsTotalsFunction & _
+                                    "(" & _
+                                    rngActivityCriteria.Address(, , , True) & _
+                                    "=" & _
+                                    """" & arrVarCriteria(i) & """" & _
+                                    ")+"
+    Next i
+    strActivityTotalsFunction = Left(strActivityTotalsFunction, Len(strActivityTotalsFunction) - 1) & ")*" & rngActivityTotals.Address(, , , True) & ")"
+    strProjectsTotalsFunction = Left(strProjectsTotalsFunction, Len(strProjectsTotalsFunction) - 1) & ")*" & rngProjects.Address(, , , True) & ")"
+        
+    GetRevCostTotalForNotAllocated = "=" & strActivityTotalsFunction & "-" & strProjectsTotalsFunction
+
+
+
+End Function
+
 
 '@Description "Generates a formula that returns a value from the allocations ws based on the project"
 Private Function GetRevCostTotalFromAllocationsWs( _
