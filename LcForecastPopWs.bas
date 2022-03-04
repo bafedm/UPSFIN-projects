@@ -37,6 +37,7 @@ Dim wsAllocations As Worksheet
 End Sub
 
 '@Description "Writes all formulas to tables - activities/projects/P&L sums, LC&LC% calc
+'finished
 Private Sub WriteFormulasToTables( _
                                     ByRef wsLcForecast As Worksheet, _
                                     ByVal dtReportingPeriod As Date, _
@@ -55,17 +56,25 @@ Private Sub WriteFormulasToTables( _
 
 
 Dim i As Long, j As Long, k As Long
-Dim n As Name
-Dim rngLocalAnchor As Range
+Dim n               As Name     'a Name object from a collection of Names
+Dim rngLocalAnchor  As Range    'the first row/column for the rev/cost values
 
+'loop named ranges in WS
 For Each n In wsLcForecast.Names
-    Debug.Print n.Name
+    'Search each range name and action based on prefix (Project, Activity, or PL)
+    'If Project write a the basic LC/LC% formulas based on the LC tables rev/cost amounts
+    'If Activity generate a formula the sums the rev/cost for all child projects and write to rev/cost cells
+    'If PL generate a formula that sums the rev/cost for all child activities and write to the rev/cost cells
         If GenericFunctions.StringSearch(1, n.Name, "Lc.Forecasts_Project.Name_") > 0 Then
-            Set rngLocalAnchor = Range(n)(4, 4)
-            For i = 0 To 11
-                WriteLcFormulasToTable Range(rngLocalAnchor(3, i), rngLocalAnchor(4, i))
-                WriteLcFormulasToTable Range(rngLocalAnchor(8, i), rngLocalAnchor(9, i))
-            Next i
+            'Set range to col JAN-YY, Revenue row
+                Set rngLocalAnchor = Range(n)(4, 4) 'TODO change to method parameter instead of fixed
+            
+            'For each month write the LC, LC% formulas to each cell
+                For i = 0 To 11
+                    WriteLcFormulasToTable Range(rngLocalAnchor(3, i), rngLocalAnchor(4, i))
+                    WriteLcFormulasToTable Range(rngLocalAnchor(8, i), rngLocalAnchor(9, i))
+                Next i
+                
         ElseIf GenericFunctions.StringSearch(1, n.Name, "Lc.Forecasts_Activity.Name_") > 0 Then
             WriteNonProjectValuesToTables wsLcForecast, arrVarPlTotalsByProject, n, dtReportingPeriod
         ElseIf GenericFunctions.StringSearch(1, n.Name, "LC.Forecast_Pl.Name_") > 0 Then
@@ -552,12 +561,14 @@ intRowOffset = 1
 End Function
 
 '@Description "Merges and applies formatting for the Row Header Title"
+'finished
 Private Sub LcForecastMergeRowHeaderTitle( _
                                                 rngTopCell As Range)
-                                                
+
+'merges, rotates the text "Actual" and "Forecast" on each LC table
+
 Range(rngTopCell, rngTopCell(4, 1)).Merge
 PAFCellFormats.FormatLcRowHeaderTitle Range(rngTopCell, rngTopCell(4, 1))
-
 
 End Sub
 
