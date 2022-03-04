@@ -270,6 +270,7 @@ Next i 'activity loop
 End Sub
 
 '@Description "Returns a Rev/Cost total for "not allocated" amounts based on Allocations WS input"
+'finished
 Private Function GetRevCostTotalForNotAllocated( _
                                             ByRef wsAllocations As Worksheet, _
                                             ByVal strActivityName As String, _
@@ -283,29 +284,24 @@ Private Function GetRevCostTotalForNotAllocated( _
 'set activity total range
 'generate [activity total] formula for rev/cost using criteria range and activity total range
 'generate [allocated] formula for rev/cost using criteria range and projects range
-'typical function format:
+'typical allocated function format:
 '   =SUMPRODUCT((([criteria range]=[critera_1])+([criteria range]=[critera_2])+...)*[sum range])
 'general unallocated calculation:
 '   unallocated = [activity total] - [allocated]
 
 Dim i As Long, j As Long, k As Long
-Dim rngActivity As Range
-Dim rngProjects As Range
-Dim rngActivityCriteria As Range
-Dim rngActivityTotals As Range
-Dim intProjectsCount As Integer
-Dim arrVarCriteria As Variant
-Dim strActivityTotalsFunction As String
-Dim strProjectsTotalsFunction As String
+Dim rngActivity                 As Range    'Parent Activity range on the Allocations WS
+Dim rngProjects                 As Range    'Target Project range on the Allocations WS
+Dim rngActivityCriteria         As Range    'Range containing
+Dim rngActivityTotals           As Range    'for the function SUMIFS this is the CRITERIA RANGE of the project, ie the Desc Groups for the Activity
+Dim intProjectsCount            As Integer  'The number of projects associated with the Activity, used to establish the size of the projects range
+Dim arrVarCriteria              As Variant  'An array of rev/cost criteria retrived from the related constants.  Use as the CRITERIA for the SUMIFS function
+Dim strActivityTotalsFunction   As String   'Generated function that calculates the total rev/costs amount for the activity
+Dim strProjectsTotalsFunction   As String   'Generated function that calculates the total combined rev/costs amount for projects in the activity
 
 'Set rev/cost criteria from constant
+'TODO can we not just access the constant instead of assigning to another variant?
     If intRevCostIndicator = 0 Then arrVarCriteria = ARRAY_DESC_GROUPS_REV Else arrVarCriteria = ARRAY_DESC_GROUPS_COSTS
-
-'Get number of projects from PlTotals array that are not "Not Allocated"
-'    intProjectsCount = 0
-'    For i = 0 To UBound(arrVarProjects, 1)
-'        If GenericFunctions.StringSearch(1, arrVarProjects(i), "Not Allocated") = 0 Then intProjectsCount = intProjectsCount + 1
-'    Next i
 
 'Set activity range
     Set rngActivity = wsAllocations.Range("Allocations_Activity.Name_" & GenericFunctions.replaceIllegalNamedRangeCharacters(strActivityName))
@@ -319,7 +315,7 @@ Dim strProjectsTotalsFunction As String
 'Set Activity Total Amount range
     Set rngActivityTotals = Range(rngActivity(3, 3), rngActivity(rngActivity.Rows.Count, 3))
     
-'Generate functions
+'Generate functions, see notes at the start of the method for details.
     strActivityTotalsFunction = "SUMPRODUCT(("
     strProjectsTotalsFunction = "SUMPRODUCT(("
     For i = 0 To UBound(arrVarCriteria, 1)
@@ -336,12 +332,12 @@ Dim strProjectsTotalsFunction As String
                                     """" & arrVarCriteria(i) & """" & _
                                     ")+"
     Next i
+    
     strActivityTotalsFunction = Left(strActivityTotalsFunction, Len(strActivityTotalsFunction) - 1) & ")*" & rngActivityTotals.Address(, , , True) & ")"
     strProjectsTotalsFunction = Left(strProjectsTotalsFunction, Len(strProjectsTotalsFunction) - 1) & ")*" & rngProjects.Address(, , , True) & ")"
-        
+      
+'Generate and return the final formula
     GetRevCostTotalForNotAllocated = "=" & strActivityTotalsFunction & "-" & strProjectsTotalsFunction
-
-
 
 End Function
 
