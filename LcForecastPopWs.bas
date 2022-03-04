@@ -366,10 +366,8 @@ GetRevCostTotalFromAllocationsWs = "=SUM(SUMIFS(" & rngSumRange.Address(, , , Tr
 
 End Function
 
-                               
-
-
 '@Description "Loops activities/projects to write blank table and set named range for each"
+'finished
 Private Sub WriteBlankTablesToLcWorksheet( _
                                         ByRef objPl As clsPandL, _
                                         ByRef wsLcForecast As Worksheet, _
@@ -444,6 +442,7 @@ Next i
 End Sub
 
 '@Description "Writes a blank LC table to the worksheet and sets the named range"
+'finished
 Private Function writeBlankTable( _
                                 ByRef wsLcForecast As Worksheet, _
                                 ByVal dtReportingDate As Date, _
@@ -460,16 +459,18 @@ Private Function writeBlankTable( _
 'set range
 
 Dim i As Long, j As Long, k As Long
-Dim intRowOffset As Integer
+Dim intRowOffset    As Integer  'active row offset counter
 
 intRowOffset = 1
 
 'Write Activity Header
     rngLocalAnchor(intRowOffset, 1) = "Activity Name"
-    PAFCellFormats.FormatProjectListHeaderActivityTitle rngLocalAnchor(intRowOffset, 1)
-    PAFCellFormats.FormatAllBordersWhiteThin rngLocalAnchor(intRowOffset, 1)
+    'cell formatting
+        PAFCellFormats.FormatProjectListHeaderActivityTitle rngLocalAnchor(intRowOffset, 1)
+        PAFCellFormats.FormatAllBordersWhiteThin rngLocalAnchor(intRowOffset, 1)
     rngLocalAnchor(intRowOffset, 3) = strActivityName
-    intRowOffset = intRowOffset + 1
+    'advance cell formatting
+        intRowOffset = intRowOffset + 1
     
 'Write Project Header if present
     If Not strProjectName = "" Then
@@ -485,17 +486,21 @@ intRowOffset = 1
             Else
                 rngLocalAnchor(intRowOffset, 3) = strProjectName
             End If
-            
-        intRowOffset = intRowOffset + 1
+        
+        'advance row offset
+            intRowOffset = intRowOffset + 1
     End If
     
 'Write month column headers based on current year
-    PAFCellFormats.FormatLcMonthColumnHeader _
-        Range(rngLocalAnchor(intRowOffset, intMonthStartCol), rngLocalAnchor(intRowOffset, intMonthStartCol + 11))
-    For i = 1 To 12
-        rngLocalAnchor(intRowOffset, intMonthStartCol + (i - 1)).Value = MonthName(i, True) & "-" & Year(dtReportingDate)
-    Next i
-    intRowOffset = intRowOffset + 1
+    'cell formatting
+        PAFCellFormats.FormatLcMonthColumnHeader _
+            Range(rngLocalAnchor(intRowOffset, intMonthStartCol), rngLocalAnchor(intRowOffset, intMonthStartCol + 11))
+    'write each month the col header based on report year
+        For i = 1 To 12
+            rngLocalAnchor(intRowOffset, intMonthStartCol + (i - 1)).Value = MonthName(i, True) & "-" & Year(dtReportingDate)
+        Next i
+    'advance row offset
+        intRowOffset = intRowOffset + 1
     
 'Write Row Header Titles
     rngLocalAnchor(intRowOffset, 1) = "Actual"
@@ -517,16 +522,19 @@ intRowOffset = 1
             PAFCellFormats.FormatLcPercentage _
                     Range(rngLocalAnchor((intRowOffset) + 3, intMonthStartCol), rngLocalAnchor((intRowOffset) + 3, intMonthStartCol + 11))
         
-        If i = 1 Then intRowOffset = intRowOffset + 5 Else intRowOffset = intRowOffset + 3
+        'advance offset for forecast rows or advance to right next table
+            If i = 1 Then intRowOffset = intRowOffset + 5 Else intRowOffset = intRowOffset + 3
     Next i
     
-    If Not strProjectName = "" Then
+    'Generate and set the named range
+    If Not strProjectName = "" Then 'if no project name then write as activity name
         SetTableRange wsLcForecast, rngLocalAnchor, intRowOffset, intMonthStartCol, strActivityName, strProjectName
     Else
         SetTableRange wsLcForecast, rngLocalAnchor, intRowOffset, intMonthStartCol, strActivityName
     End If
     
-writeBlankTable = intRowOffset
+'return total row offset for table
+    writeBlankTable = intRowOffset
 
 End Function
 
