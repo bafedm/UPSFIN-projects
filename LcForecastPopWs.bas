@@ -392,21 +392,17 @@ Private Sub WriteBlankTablesToLcWorksheet( _
 'next activity
 
 Dim i As Long, k As Long, j As Long
-Dim rngTopAnchor            As Range
-Dim intLcTableRowOffset        As Integer
-Dim intPlTableRowOffset        As Integer
-Dim intAnchorRowOffset         As Integer
-Dim intMonthStartCol        As Integer
-Dim intRowHeaderStartRow    As Integer
-Dim intWsRowOffset          As Integer
-Dim intTableRowOffset       As Integer
+Dim rngTopAnchor            As Range    'WS Top Anchor
+Dim intLcTableRowOffset     As Integer  'Sets the gap between two Lc forecast tables
+Dim intPlTableRowOffset     As Integer  'Sets the initial gap between the PL level forecast and the top anchor
+Dim intAnchorRowOffset      As Integer  'The active offset from the top anchor.
+Dim intMonthStartCol        As Integer  'Number of columns from the right of anchor to start the month columns
+Dim intTableRowOffset       As Integer  'Number of rows to offset after a blank table is written to the WS
 
 'Constants
     intLcTableRowOffset = 2
     intPlTableRowOffset = 11
     intMonthStartCol = 3
-    'intRowHeaderStartRow = 3  (probably not required)
-
 
 intAnchorRowOffset = (intLcTableRowOffset * 2) + intPlTableRowOffset
 
@@ -426,17 +422,23 @@ intAnchorRowOffset = (intLcTableRowOffset * 2) + intPlTableRowOffset
 '   next project
 'next activity
 
+'loop activities
 For i = 0 To UBound(arrVarPlTotalsByProject, 1)
-    intTableRowOffset = writeBlankTable(wsLcForecast, dtReportingPeriod, rngTopAnchor(intAnchorRowOffset, 1), intMonthStartCol, arrVarPlTotalsByProject(i, 0))
-    intAnchorRowOffset = intAnchorRowOffset + intTableRowOffset + intLcTableRowOffset
+    'write activity table, return new offset amount
+        intTableRowOffset = writeBlankTable(wsLcForecast, dtReportingPeriod, rngTopAnchor(intAnchorRowOffset, 1), intMonthStartCol, arrVarPlTotalsByProject(i, 0))
+    'advance row offset
+        intAnchorRowOffset = intAnchorRowOffset + intTableRowOffset + intLcTableRowOffset
     
+    'loop projecrts
     For j = 0 To UBound(arrVarPlTotalsByProject(i, 1), 1)
-        If Not arrVarPlTotalsByProject(i, 1)(j, 0) = "no projects" Then
-            intTableRowOffset = writeBlankTable(wsLcForecast, dtReportingPeriod, rngTopAnchor(intAnchorRowOffset, 1), intMonthStartCol, arrVarPlTotalsByProject(i, 0), arrVarPlTotalsByProject(i, 1)(j, 0))
-            intAnchorRowOffset = intAnchorRowOffset + intTableRowOffset + intLcTableRowOffset
-        End If
+        'if project name is "no projects" skip it
+            If Not arrVarPlTotalsByProject(i, 1)(j, 0) = "no projects" Then
+                'write project table, retrun new offset amount
+                    intTableRowOffset = writeBlankTable(wsLcForecast, dtReportingPeriod, rngTopAnchor(intAnchorRowOffset, 1), intMonthStartCol, arrVarPlTotalsByProject(i, 0), arrVarPlTotalsByProject(i, 1)(j, 0))
+                'advance row offset
+                    intAnchorRowOffset = intAnchorRowOffset + intTableRowOffset + intLcTableRowOffset
+            End If
     Next j
-    
 Next i
     
 End Sub
