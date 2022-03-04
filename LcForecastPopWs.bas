@@ -86,6 +86,7 @@ Next n
 End Sub
 
 '@Description "Writes the Activity and PL formulas"
+'finished
 Private Sub WriteNonProjectValuesToTables( _
                                             ByRef wsLcForecast As Worksheet, _
                                             ByVal arrVarPlTotalsByProject As Variant, _
@@ -93,43 +94,49 @@ Private Sub WriteNonProjectValuesToTables( _
                                             ByVal dtReportingPeriod As Date, _
                                             Optional ByVal boolIsActivity As Boolean = True)
 Dim i As Long, j As Long, k As Long
-Dim arrVarProjectRangeNames As Variant
-Dim strRevenueSumFormula As String
-Dim strCostsSumFormula As String
-Dim rngLocalAnchor As Range
-Dim intRevCostRowOffset As Integer
+Dim arrVarProjectOrActivityRangeNames   As Variant  'An array of ranges used to generate a formula
+Dim strRevenueSumFormula                As String   'Generated formula to sum project or activity revenues
+Dim strCostsSumFormula                  As String   'Generated formula to sum project or activity costs
+Dim rngLocalAnchor                      As Range    'anchor cell to write the formulas
+Dim intRevCostRowOffset                 As Integer  'determines the inital row offset used to generate formulas depending on activity or pl LC table
 
 'get activity proper name from ws table
 'get list of projects from array
 'loop worksheet names again and generate string of ranges
 'write to activity table month
 
-Set rngLocalAnchor = Range(nameActivityOrPlRange)(3, 4)
+Set rngLocalAnchor = Range(nameActivityOrPlRange)(3, 4) 'TODO replace fixed values with variables or constants
 
-If boolIsActivity = True Then
-    arrVarProjectRangeNames = GetArrayOfProjectRangeNames(arrVarPlTotalsByProject, Range(nameActivityOrPlRange)(1, 3).Value)
-    intRevCostRowOffset = 4
-Else
-    arrVarProjectRangeNames = GetArrayOfActivityRangeNames(arrVarPlTotalsByProject)
-    intRevCostRowOffset = 3
-End If
-    
-For i = 0 To Month(dtReportingPeriod) - 1
-    strRevenueSumFormula = "=SUM("
-    strCostsSumFormula = "=SUM("
-    For j = 0 To UBound(arrVarProjectRangeNames, 1)
-        If Not IsEmpty(arrVarProjectRangeNames(j)) Then
-            strRevenueSumFormula = strRevenueSumFormula & wsLcForecast.Range(arrVarProjectRangeNames(j))(intRevCostRowOffset + 0, 3 + i).Address & ","
-            strCostsSumFormula = strCostsSumFormula & wsLcForecast.Range(arrVarProjectRangeNames(j))(intRevCostRowOffset + 1, 3 + i).Address & ","
-        End If
-    Next j
-    strRevenueSumFormula = Left(strRevenueSumFormula, Len(strRevenueSumFormula) - 1) & ")"
-    rngLocalAnchor(1, i).Formula = strRevenueSumFormula
-    strCostsSumFormula = Left(strCostsSumFormula, Len(strCostsSumFormula) - 1) & ")"
-    rngLocalAnchor(2, i) = strCostsSumFormula
-    'write lc,lc%
-        WriteLcFormulasToTable Range(rngLocalAnchor(3, i), rngLocalAnchor(4, i))
-Next i
+'Project LC Tables have an extra row that has the project name.  Activity tables do not have this row.
+'If we are generating forumlas for an Activity (ie summing Project values) then we need a higher offset to account for the extra row
+'If we are generating formulas for a PL (ie summing Activity Values) then we need use a lower offset since there is no "Project Name" row
+    If boolIsActivity = True Then
+        arrVarProjectOrActivityRangeNames = GetArrayOfProjectRangeNames(arrVarPlTotalsByProject, Range(nameActivityOrPlRange)(1, 3).Value)
+        intRevCostRowOffset = 4 'TODO replace fixed values with variables or constants
+    Else
+        arrVarProjectOrActivityRangeNames = GetArrayOfActivityRangeNames(arrVarPlTotalsByProject)
+        intRevCostRowOffset = 3 'TODO replace fixed values with variables or constants
+    End If
+
+'For each month up to the report month generate and write the formulas to sum each project/activity for each rev/cost
+    For i = 0 To Month(dtReportingPeriod) - 1
+        strRevenueSumFormula = "=SUM("
+        strCostsSumFormula = "=SUM("
+        For j = 0 To UBound(arrVarProjectOrActivityRangeNames, 1)
+            If Not IsEmpty(arrVarProjectOrActivityRangeNames(j)) Then
+                strRevenueSumFormula = strRevenueSumFormula & wsLcForecast.Range(arrVarProjectOrActivityRangeNames(j))(intRevCostRowOffset + 0, 3 + i).Address & ","
+                strCostsSumFormula = strCostsSumFormula & wsLcForecast.Range(arrVarProjectOrActivityRangeNames(j))(intRevCostRowOffset + 1, 3 + i).Address & ","
+            End If
+        Next j
+        
+        strRevenueSumFormula = Left(strRevenueSumFormula, Len(strRevenueSumFormula) - 1) & ")"
+        rngLocalAnchor(1, i).Formula = strRevenueSumFormula
+        strCostsSumFormula = Left(strCostsSumFormula, Len(strCostsSumFormula) - 1) & ")"
+        rngLocalAnchor(2, i) = strCostsSumFormula
+        
+        'write lc,lc%
+            WriteLcFormulasToTable Range(rngLocalAnchor(3, i), rngLocalAnchor(4, i))
+    Next i
 
 End Sub
 
