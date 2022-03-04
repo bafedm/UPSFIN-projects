@@ -191,6 +191,7 @@ End Sub
 
 
 '@Description "Writes LC values for each activity/project prior to current month"
+'TODO Use variables for setting rngLcTableAmountAnchor Range offset
 Private Sub WriteRevCostValuesToTables( _
                                     ByRef wsLcForecast As Worksheet, _
                                     ByRef wsAllocations As Worksheet, _
@@ -198,10 +199,11 @@ Private Sub WriteRevCostValuesToTables( _
                                     ByVal dtReportingPeriod As Date)
                                     
 Dim i As Long, j As Long, k As Long, m As Long
-Dim intTargetMonth As Integer
-Dim n As Name
-Dim rngLcTableAmountAnchor As Range
-                                    
+Dim intTargetMonth          As Integer  'The month number of the report month
+Dim n                       As Name     'a Name object from a collection of Names
+Dim rngLcTableAmountAnchor  As Range    'the first row/column for the rev/cost values
+                                  
+'==Basic loop layout
 'loop activities
 '   loop projects
 '       populate months rev, cost for prior months from array
@@ -209,7 +211,7 @@ Dim rngLcTableAmountAnchor As Range
 '   next project
 'next activity
 
-'arrVarPlTotalsByProject array schema
+'==arrVarPlTotalsByProject Array Schema
 '(i, 0) Activity Name
 '(i, 1)(j, 0) Project Names Array
 '(i, 1)(j, 1)(x, 0) x = month (1 to dtReportingPeriod), 0 = Rev Amount USD
@@ -222,36 +224,45 @@ Dim rngLcTableAmountAnchor As Range
 'Full path example:
 '   arrVarPlTotalsByProject(0, 1)(0, 1)(1, 1) = Oman Slickline, HCF Call OFf, Jan-21 Cost Amount USD
 
-'Target month is month prior to reporting period month
+'Target month is month prior to reporting period month.  -1 as number is used for a column offset.
     intTargetMonth = Month(dtReportingPeriod) - 1
 
+'loop activities
 For i = 0 To UBound(arrVarPlTotalsByProject, 1)
+    'loop projects
     For j = 0 To UBound(arrVarPlTotalsByProject(i, 1), 1)
+        'loop worksheet names
         For Each n In wsLcForecast.Names
-            If GenericFunctions.StringSearch(1, n.Name, GenericFunctions.replaceIllegalNamedRangeCharacters(arrVarPlTotalsByProject(i, 1)(j, 0))) > 0 Then
-                Set rngLcTableAmountAnchor = Range(n)(4, 4)
-                For k = 0 To intTargetMonth
-                    For m = 0 To 1
-                        If Not k = intTargetMonth Then
-                            rngLcTableAmountAnchor(m + 1, k).Value = arrVarPlTotalsByProject(i, 1)(j, 1)(k + 1, m)
-                            
-                        ElseIf k = intTargetMonth And GenericFunctions.StringSearch(1, arrVarPlTotalsByProject(i, 1)(j, 0), "Not Assigned") = 0 Then
-                            rngLcTableAmountAnchor(m + 1, k).Value = GetRevCostTotalFromAllocationsWs( _
-                                                                        wsAllocations, _
-                                                                        arrVarPlTotalsByProject(i, 0), _
-                                                                        arrVarPlTotalsByProject(i, 1)(j, 0), _
-                                                                        m)
-                        Else
-                            rngLcTableAmountAnchor(m + 1, k).Value = GetRevCostTotalForNotAllocated( _
-                                                                        wsAllocations, _
-                                                                        arrVarPlTotalsByProject(i, 0), _
-                                                                        arrVarPlTotalsByProject(i, 1)(j, 1), _
-                                                                        m)
-                        End If
-                        'Debug.Print arrVarPlTotalsByProject(i, 0), arrVarPlTotalsByProject(i, 1)(j, 0), arrVarPlTotalsByProject(i, 1)(j, 1)(k + 1, m)
-                    Next m 'rev/cost
-                Next k ' monhts
-            End If
+            'for current ws name see if matches with the project name
+                If GenericFunctions.StringSearch(1, n.Name, GenericFunctions.replaceIllegalNamedRangeCharacters(arrVarPlTotalsByProject(i, 1)(j, 0))) > 0 Then
+                    'Set anchor to intersection of month Jan-YY, Row "Revenue"
+                        Set rngLcTableAmountAnchor = Range(n)(4, 4) '<--Change to variables
+                    'loop months
+                    For k = 0 To intTargetMonth
+                        'loop rev/costs
+                        For m = 0 To 1
+                            'if k (month) != target month then we write the value from the values array
+                            'if k = current month AND the project name is not "No Projects" then write formula to get values from Allocations WS
+                            'if k = current month AND project name is "No Projects" then write formula to get the unallocated rev/cost totals
+                                If Not k = intTargetMonth Then
+                                    rngLcTableAmountAnchor(m + 1, k).Value = arrVarPlTotalsByProject(i, 1)(j, 1)(k + 1, m)
+                                    
+                                ElseIf k = intTargetMonth And GenericFunctions.StringSearch(1, arrVarPlTotalsByProject(i, 1)(j, 0), "Not Assigned") = 0 Then
+                                    rngLcTableAmountAnchor(m + 1, k).Value = GetRevCostTotalFromAllocationsWs( _
+                                                                                wsAllocations, _
+                                                                                arrVarPlTotalsByProject(i, 0), _
+                                                                                arrVarPlTotalsByProject(i, 1)(j, 0), _
+                                                                                m)
+                                Else
+                                    rngLcTableAmountAnchor(m + 1, k).Value = GetRevCostTotalForNotAllocated( _
+                                                                                wsAllocations, _
+                                                                                arrVarPlTotalsByProject(i, 0), _
+                                                                                arrVarPlTotalsByProject(i, 1)(j, 1), _
+                                                                                m)
+                                End If
+                        Next m 'rev/cost
+                    Next k ' monhts
+                End If
         Next n 'worksheet names
     Next j 'project loop
 Next i 'activity loop
@@ -549,6 +560,7 @@ PAFCellFormats.FormatLcRowHeaderTitle Range(rngTopCell, rngTopCell(4, 1))
 End Sub
 
 '@Description "Calculates, generates name, and sets a named range for caller table"
+'finished
 Private Sub SetTableRange( _
                             ByRef wsLcForecast As Worksheet, _
                             ByRef rngLocalAnchor As Range, _
@@ -562,8 +574,8 @@ Private Sub SetTableRange( _
 'get column month offest
 'calc right bottom corner = local anchor (rowoffset, col month offset + 11)
 
-Dim rngTarget As Range
-Dim strRangeName As String
+Dim rngTarget       As Range    'A range that encompasses the LC table
+Dim strRangeName    As String   'The name of the range that will be saved to the WS
 
 'Set range
     Set rngTarget = Range(rngLocalAnchor(1, 1), rngLocalAnchor(intRowOffset, intMonthStartCol + 11))
