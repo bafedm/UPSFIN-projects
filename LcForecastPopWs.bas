@@ -191,7 +191,7 @@ End Sub
 
 
 '@Description "Writes LC values for each activity/project prior to current month"
-'TODO Use variables for setting rngLcTableAmountAnchor Range offset
+'finished
 Private Sub WriteRevCostValuesToTables( _
                                     ByRef wsLcForecast As Worksheet, _
                                     ByRef wsAllocations As Worksheet, _
@@ -236,7 +236,7 @@ For i = 0 To UBound(arrVarPlTotalsByProject, 1)
             'for current ws name see if matches with the project name
                 If GenericFunctions.StringSearch(1, n.Name, GenericFunctions.replaceIllegalNamedRangeCharacters(arrVarPlTotalsByProject(i, 1)(j, 0))) > 0 Then
                     'Set anchor to intersection of month Jan-YY, Row "Revenue"
-                        Set rngLcTableAmountAnchor = Range(n)(4, 4) '<--Change to variables
+                        Set rngLcTableAmountAnchor = Range(n)(4, 4) 'TODO change to method parameter instead of fixed
                     'loop months
                     For k = 0 To intTargetMonth
                         'loop rev/costs
@@ -345,8 +345,8 @@ Dim strProjectsTotalsFunction As String
 
 End Function
 
-
 '@Description "Generates a formula that returns a value from the allocations ws based on the project"
+'finished
 Private Function GetRevCostTotalFromAllocationsWs( _
                                                     ByRef wsAllocations As Worksheet, _
                                                     ByVal strActivityName As String, _
@@ -359,21 +359,27 @@ Private Function GetRevCostTotalFromAllocationsWs( _
 'generate sum range from sum range name
 'generate criteria range from range name
 
-Dim rngActivityRange As Range
-Dim rngProjectRange As Range
-Dim rngSumRange As Range
-Dim rngCriteriaRange As Range
-Dim arrVarCriteria As Variant
+Dim rngActivityRange    As Range    'The range of the parent activity
+Dim rngProjectRange     As Range    'The range of the current project
+Dim rngSumRange         As Range    'for the function SUMIFS this is the SUM RANGE of the project, ie the allocated values
+Dim rngCriteriaRange    As Range    'for the function SUMIFS this is the CRITERIA RANGE of the project, ie the Desc Groups for the Activity
+Dim arrVarCriteria      As Variant  'An array of rev/cost criteria retrived from the related constants.  Use as the CRITERIA for the SUMIFS function
 
-If intRevCostIndicator = 0 Then arrVarCriteria = ARRAY_DESC_GROUPS_REV Else arrVarCriteria = ARRAY_DESC_GROUPS_COSTS
+'Get desc group criteria array from constants
+'TODO can we not just access the constant instead of assigning to another variant?
+    If intRevCostIndicator = 0 Then arrVarCriteria = ARRAY_DESC_GROUPS_REV Else arrVarCriteria = ARRAY_DESC_GROUPS_COSTS
 
-Set rngActivityRange = wsAllocations.Range("Allocations_Activity.Name_" & GenericFunctions.replaceIllegalNamedRangeCharacters(strActivityName))
-Set rngProjectRange = wsAllocations.Range("Allocations_Project.Name_" & GenericFunctions.replaceIllegalNamedRangeCharacters(strProjectName))
+'Set activity and project ranges on the Allocations WS based on the parameters passed
+    Set rngActivityRange = wsAllocations.Range("Allocations_Activity.Name_" & GenericFunctions.replaceIllegalNamedRangeCharacters(strActivityName))
+    Set rngProjectRange = wsAllocations.Range("Allocations_Project.Name_" & GenericFunctions.replaceIllegalNamedRangeCharacters(strProjectName))
 
-Set rngSumRange = wsAllocations.Range(rngProjectRange(3, 1), rngProjectRange(rngProjectRange.Rows.Count, 1))
-Set rngCriteriaRange = wsAllocations.Range(rngActivityRange(3, 1), rngActivityRange(rngActivityRange.Rows.Count, 1))
+'Set the sum range based on the project name, set the criteria range based on the activity name
+'TODO replace fixed range offset values with variables/constants
+    Set rngSumRange = wsAllocations.Range(rngProjectRange(3, 1), rngProjectRange(rngProjectRange.Rows.Count, 1))
+    Set rngCriteriaRange = wsAllocations.Range(rngActivityRange(3, 1), rngActivityRange(rngActivityRange.Rows.Count, 1))
 
-GetRevCostTotalFromAllocationsWs = "=SUM(SUMIFS(" & rngSumRange.Address(, , , True) & ", " & rngCriteriaRange.Address(, , , True) & ", {""" & Join(arrVarCriteria, """, """) & """}))"
+'Builds and returns the function forumla
+    GetRevCostTotalFromAllocationsWs = "=SUM(SUMIFS(" & rngSumRange.Address(, , , True) & ", " & rngCriteriaRange.Address(, , , True) & ", {""" & Join(arrVarCriteria, """, """) & """}))"
 
 End Function
 
