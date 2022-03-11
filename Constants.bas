@@ -32,3 +32,14 @@ ARRAY_DESC_GROUPS_COSTS = Array("Personnel Expenses", "External Services", "Trav
                         "Depreciation", "Other Expenses", "Allocation Indirect Expenses", "Split Overhead & Dir/Indir Costs")
 
 End Function
+
+'@Descrption "A list of character patterns that need to be removed from an ADODB entry"
+
+Public Function ARRAY_CHAR_REMOVE_FROM_MDX( _
+                                        Optional ByVal intIndex As Integer) _
+                                        As Variant
+                                        
+ARRAY_CHAR_REMOVE_FROM_MDX = Array("&[", "]&", "[", "]")
+                                        
+End Function
+
