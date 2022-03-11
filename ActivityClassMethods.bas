@@ -133,7 +133,7 @@ For i = LBound(arrVarRawHeaderNames, 1) To UBound(arrVarRawHeaderNames, 1)
             ReDim Preserve arrVarColumnIndexes(j)
             ReDim Preserve arrVarColumnNames(j)
             arrVarColumnIndexes(j) = i
-            arrVarColumnNames(j) = CleanMdxString(arrVarRawHeaderNames(i), 2, Array("[", "]", "&"), True)
+            arrVarColumnNames(j) = CleanMdxString(arrVarRawHeaderNames(i), 2, ARRAY_CHAR_REMOVE_FROM_MDX, True)
             j = j + 1
     
     ElseIf StringSearch(1, arrVarRawHeaderNames(i), "[MMM-YYYY]") Then
@@ -142,7 +142,7 @@ For i = LBound(arrVarRawHeaderNames, 1) To UBound(arrVarRawHeaderNames, 1)
         ReDim Preserve arrVarColumnIndexes(j)
         ReDim Preserve arrVarColumnNames(j)
         arrVarColumnIndexes(j) = i
-        arrVarColumnNames(j) = CleanMdxString(arrVarRawHeaderNames(i), 0, Array("[", "]", "&"), True)
+        arrVarColumnNames(j) = CleanMdxString(arrVarRawHeaderNames(i), 0, ARRAY_CHAR_REMOVE_FROM_MDX, True)
         j = j + 1
     
     End If
@@ -324,8 +324,8 @@ Dim arrVarTableDataFromDm()   As Variant                        'return array, 2
         ReDim arrVarTableDataFromDm(0 To UBound(dictDmReturnData("header")), 0 To 1)
         
         For i = LBound(dictDmReturnData("header")) To UBound(dictDmReturnData("header"))
-            arrVarTableDataFromDm(i, 0) = GenericFunctions.CleanMdxString(dictDmReturnData("header")(i), 3, Array("[", "]", "&"))
-            arrVarTableDataFromDm(i, 1) = GenericFunctions.CleanMdxString(dictDmReturnData("header")(i), 0, Array("[", "]", "&"), True)
+            arrVarTableDataFromDm(i, 0) = GenericFunctions.CleanMdxString(dictDmReturnData("header")(i), 3, ARRAY_CHAR_REMOVE_FROM_MDX)
+            arrVarTableDataFromDm(i, 1) = GenericFunctions.CleanMdxString(dictDmReturnData("header")(i), 0, ARRAY_CHAR_REMOVE_FROM_MDX, True)
         Next i
     
 'set array to function and return

@@ -88,7 +88,7 @@ Dim arrVarPlNamesFromDm As Variant
 
 'Clean array elements by removing MDX formatting
     For i = 0 To UBound(arrVarPlNamesFromDm)
-        arrVarPlNamesFromDm(i) = GenericFunctions.CleanMdxString(arrVarPlNamesFromDm(i), 0, Array("[", "]", "&"), True)
+        arrVarPlNamesFromDm(i) = GenericFunctions.CleanMdxString(arrVarPlNamesFromDm(i), 0, ARRAY_CHAR_REMOVE_FROM_MDX, True)
     Next i
 
 'Set function to cleaned array
