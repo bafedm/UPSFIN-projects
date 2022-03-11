@@ -217,7 +217,7 @@ Dim arrStrMdxSplit()    As String
 Dim intSplitCount       As Integer
 Dim strReturn           As String
 Dim element             As Variant
-                            
+                          
 'Split incoming MDX string into array based on delimiter
     arrStrMdxSplit = Split(varMdxIn, strSplitDelimiter)
     intSplitCount = UBound(arrStrMdxSplit)
@@ -226,12 +226,12 @@ Dim element             As Variant
     Else
         strReturn = arrStrMdxSplit(intSplitTargetIndex - 1)
     End If
-
+   
 'For target array element loop through list of characters to remove
     For Each element In arrVarReplaceCharacters
         strReturn = Replace(strReturn, element, "")
     Next element
-
+    
 CleanMdxString = strReturn
 
 End Function
