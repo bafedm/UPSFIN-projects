@@ -12,11 +12,14 @@ Public Function GenerateProjectObjectCollection( _
 
 
 Dim i As Long, j As Long, k As Long
-Dim collProjects                As New Collection   'Projects collection, returns to caller
+Dim collProjects                As Collection   'Projects collection, returns to caller
 Dim lsoProjectsTable            As ListObject       'Project Table from worksheet as object
 Dim rngProjectsTable            As Range            'Worksheet range of the projects table
 Dim arrVarProjectDataBodyRange  As Variant          'Data body range from project table
 Dim objProject                  As clsProject       'project object for each project that is assigned to collection
+
+'Create new collProjects collection
+    Set collProjects = New Collection
 
 'Set table object
     Set lsoProjectsTable = wsProjectWb.ListObjects(TBL_PROJECT_LIST)
