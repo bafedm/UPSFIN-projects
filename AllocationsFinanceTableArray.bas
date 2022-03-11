@@ -89,7 +89,10 @@ Dim arrVarMasterList As Variant
 
 
 'store dictionary items to 2d array
-    ReDim arrVarMasterList(0 To dictMasterPlFinanceTable.Count - 1, 0 To UBound(dictMasterPlFinanceTable.Items(1), 1))
+    ReDim arrVarMasterList(0 To dictMasterPlFinanceTable.Count - 1, 0 To UBound(dictMasterPlFinanceTable.Items(0), 1))
+    'I'm not sure why this was .Items(1) previously but changing it (0) doesn't seem to have any negative effect
+    'more over I'm worried why (1) returned valid results when it was probably skipping over some values...
+    'ReDim arrVarMasterList(0 To dictMasterPlFinanceTable.Count - 1, 0 To UBound(dictMasterPlFinanceTable.Items(1), 1))
     
     For i = 0 To dictMasterPlFinanceTable.Count - 1
         For j = 0 To UBound(dictMasterPlFinanceTable.Items(i), 1)
