@@ -173,31 +173,42 @@ Dim strRevCost                      As String
                 End If
             
             'Resize/reset Month/Amount USD array
+            'For all months besides Jan.
+            '   Loop through each month and populate rev/cost values as required.
+            'For month of Jan
+            '   Set rev/cost information for month of Jan to null
+            If Month(dtReportingPeriod) = 1 Then
+                ReDim arrVarPlMonthlyRevCostTotals(1 To 1, 0 To 1)
+                arrVarPlMonthlyRevCostTotals(1, 0) = Null
+                arrVarPlMonthlyRevCostTotals(1, 1) = Null
+            Else
                 ReDim arrVarPlMonthlyRevCostTotals(1 To Month(dtReportingPeriod) - 1, 0 To 1)
             
-            'Loop Month
-            For k = 1 To Month(dtReportingPeriod) - 1 'month loop
-                
-                'Generate target month
-                    dtTargetMonth = CDate(CStr(Year(dtReportingPeriod)) & "-" & MonthName(k, True) & "-" & "01")
-                
-                'Rev/Cost Loop
-                For m = 0 To 1 'rev/cost loop
-                
-                'Set Rev/Cost variable
-                    If m = 0 Then strRevCost = "Revenue" Else strRevCost = "Costs"
+                'Loop Month
+                For k = 1 To Month(dtReportingPeriod) - 1 'month loop
                     
-                'Get subtotal
-                    arrVarPlMonthlyRevCostTotals(k, m) = GetFinanceTableRevCostSubTotal( _
-                                                        objPl, _
-                                                        collActivities(arrVarActivityProjectList(i, 0)), _
-                                                        dtTargetMonth, _
-                                                        arrVarActivityProjectList(i, 1)(j), _
-                                                        strRevCost)
-            
-                Next m 'Next Rev/Cost
+                    'Generate target month
+                        dtTargetMonth = CDate(CStr(Year(dtReportingPeriod)) & "-" & MonthName(k, True) & "-" & "01")
+                    
+                    'Rev/Cost Loop
+                    For m = 0 To 1 'rev/cost loop
+                    
+                    'Set Rev/Cost variable
+                        If m = 0 Then strRevCost = "Revenue" Else strRevCost = "Costs"
+                        
+                    'Get subtotal
+                        arrVarPlMonthlyRevCostTotals(k, m) = GetFinanceTableRevCostSubTotal( _
+                                                            objPl, _
+                                                            collActivities(arrVarActivityProjectList(i, 0)), _
+                                                            dtTargetMonth, _
+                                                            arrVarActivityProjectList(i, 1)(j), _
+                                                            strRevCost)
                 
-            Next k ' Next Month
+                    Next m 'Next Rev/Cost
+                    
+                Next k ' Next Month
+            
+            End If 'Conditional for month of Jan
             
             'Assign monthly rev/cost amount to project
                 arrVarProjectList(j, 1) = arrVarPlMonthlyRevCostTotals
