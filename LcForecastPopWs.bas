@@ -140,7 +140,6 @@ Set rngLocalAnchor = Range(nameActivityOrPlRange)(3, 4) 'TODO replace fixed valu
 
 End Sub
 
-
 '@Description "return array of projects or activity worksheet names based on activity or Pl"
 Private Function GetArrayOfProjectRangeNames( _
                                         ByVal arrVarPlTotalsByProject As Variant, _
@@ -286,7 +285,6 @@ Next i 'activity loop
 End Sub
 
 '@Description "Returns a Rev/Cost total for "not allocated" amounts based on Allocations WS input"
-'finished
 Private Function GetRevCostTotalForNotAllocated( _
                                             ByRef wsAllocations As Worksheet, _
                                             ByVal strActivityName As String, _
@@ -358,7 +356,6 @@ Dim strProjectsTotalsFunction   As String   'Generated function that calculates 
 End Function
 
 '@Description "Generates a formula that returns a value from the allocations ws based on the project"
-'finished
 Private Function GetRevCostTotalFromAllocationsWs( _
                                                     ByRef wsAllocations As Worksheet, _
                                                     ByVal strActivityName As String, _
@@ -396,7 +393,6 @@ Dim arrVarCriteria      As Variant  'An array of rev/cost criteria retrived from
 End Function
 
 '@Description "Loops activities/projects to write blank table and set named range for each"
-'finished
 Private Sub WriteBlankTablesToLcWorksheet( _
                                         ByRef objPl As clsPandL, _
                                         ByRef wsLcForecast As Worksheet, _
@@ -471,7 +467,6 @@ Next i
 End Sub
 
 '@Description "Writes a blank LC table to the worksheet and sets the named range"
-'finished
 Private Function writeBlankTable( _
                                 ByRef wsLcForecast As Worksheet, _
                                 ByVal dtReportingDate As Date, _
