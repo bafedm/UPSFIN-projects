@@ -170,19 +170,29 @@ Dim strMdxPath                  As String                       'Mdx path for da
 'Values: [Measures].[(PROJ) BU Upstream P&Ls Amount USD]
 
 'Set Mdx path
-    strMdxPath = "SELECT NON EMPTY Hierarchize({[dm_d_AccountingPeriod_Calendar].[MMM-YYYY].[MMM-YYYY].AllMembers}) " & _
-            "DIMENSION PROPERTIES PARENT_UNIQUE_NAME,MEMBER_VALUE,HIERARCHY_UNIQUE_NAME ON COLUMNS , NON EMPTY " & _
-            "Hierarchize(CrossJoin({[q_dm_BU_CY_PY].[Project_Name].[Project_Name].AllMembers}," & _
-            "{([tbl_d_AC_DescGroupRanges].[RevCost_Groups].[RevCost_Groups].AllMembers," & _
-            "[tbl_d_AC_DescGroupRanges].[Desc_Groups].[Desc_Groups].AllMembers,[q_dm_BU_CY_PY].[Description].[Description].AllMembers)})) " & _
-            "DIMENSION PROPERTIES PARENT_UNIQUE_NAME,MEMBER_VALUE,HIERARCHY_UNIQUE_NAME ON ROWS  FROM [Model] WHERE " & _
-            "([dm_d_ReportingPeriod_Calendar].[MMM-YYYY].&[" & _
-            Format(dtReportingPeriod, "MMM-YYYY") & _
-            "],[q_co_PlRanges].[PL_Name].&[" & _
-            strPlName & _
-            "],[d_tbl_tCodeNamesActivity].[Activity_Name].&[" & _
-            strActivityName & _
-            "],[Measures].[(BU PL) Description Grouping Amount USD]) CELL PROPERTIES VALUE, FORMAT_STRING, LANGUAGE, BACK_COLOR, FORE_COLOR, FONT_FLAGS"
+'    strMdxPath = "SELECT NON EMPTY Hierarchize({[dm_d_AccountingPeriod_Calendar].[MMM-YYYY].[MMM-YYYY].AllMembers}) " & _
+'            "DIMENSION PROPERTIES PARENT_UNIQUE_NAME,MEMBER_VALUE,HIERARCHY_UNIQUE_NAME ON COLUMNS , NON EMPTY " & _
+'            "Hierarchize(CrossJoin({[q_dm_BU_CY_PY].[Project_Name].[Project_Name].AllMembers}," & _
+'            "{([tbl_d_AC_DescGroupRanges].[RevCost_Groups].[RevCost_Groups].AllMembers," & _
+'            "[tbl_d_AC_DescGroupRanges].[Desc_Groups].[Desc_Groups].AllMembers,[q_dm_BU_CY_PY].[Description].[Description].AllMembers)})) " & _
+'            "DIMENSION PROPERTIES PARENT_UNIQUE_NAME,MEMBER_VALUE,HIERARCHY_UNIQUE_NAME ON ROWS  FROM [Model] WHERE " & _
+'            "([dm_d_ReportingPeriod_Calendar].[MMM-YYYY].&[" & _
+'            Format(dtReportingPeriod, "MMM-YYYY") & _
+'            "],[q_co_PlRanges].[PL_Name].&[" & _
+'            strPlName & _
+'            "],[d_tbl_tCodeNamesActivity].[Activity_Name].&[" & _
+'            strActivityName & _
+'            "],[Measures].[(BU PL) Description Grouping Amount USD]) CELL PROPERTIES VALUE, FORMAT_STRING, LANGUAGE, BACK_COLOR, FORE_COLOR, FONT_FLAGS"
+     
+     strMdxPath = "SELECT NON EMPTY Hierarchize({[dm_Calendar].[MMM-YYYY].[MMM-YYYY].AllMembers}) DIMENSION PROPERTIES PARENT_UNIQUE_NAME,MEMBER_VALUE,HIERARCHY_UNIQUE_NAME ON COLUMNS " & _
+                ", NON EMPTY Hierarchize(CrossJoin({[q_co_plCombined].[Project].[Project].AllMembers}, {([tbl_revCostGrouping].[Revenue Cost Group].[Revenue Cost Group].AllMembers," & _
+                "[tbl_descriptionGrouping].[Description Group].[Description Group].AllMembers,[q_co_plCombined].[Description].[Description].AllMembers)})) " & _
+                "DIMENSION PROPERTIES PARENT_UNIQUE_NAME,MEMBER_VALUE,HIERARCHY_UNIQUE_NAME ON ROWS  FROM [Model] WHERE ([q_co_plTcodeRanges].[P&L name].&[" & _
+                strPlName & _
+                "],[tbl_tCodeNamesActivity].[Activity Name].&[" & _
+                strActivityName & _
+                "],[Measures].[P&L Amount USD]) CELL PROPERTIES VALUE, FORMAT_STRING, LANGUAGE, BACK_COLOR, FORE_COLOR, FONT_FLAGS"
+
 
 'Call function to get table data and return to caller
     Set GetFinanceDataHeaderAndTableFromDm = GetTableDataFromDataModel(wbUpsfin, strMdxPath)
@@ -305,13 +315,28 @@ Dim arrVarTableDataFromDm()   As Variant                        'return array, 2
 'Values: [Measures].[(PROJ) BU Upstream P&Ls Amount USD]
 
 'Set MDX
-    strMdxPath = "SELECT NON EMPTY Hierarchize(CrossJoin({[d_tbl_tCodeNamesActivity].[Activity_Name].[Activity_Name].AllMembers}, " & _
-        "{([q_co_PlRanges].[PL_Name].[PL_Name].AllMembers)})) DIMENSION PROPERTIES PARENT_UNIQUE_NAME,MEMBER_VALUE,HIERARCHY_UNIQUE_NAME ON COLUMNS  " & _
-        "FROM [Model] WHERE ([dm_d_ReportingPeriod_Calendar].[MMM-YYYY].&[" & _
-        Format(dtReportingPeriod, "MMM-YYYY") & _
-        "],[dm_d_AccountingPeriod_Calendar].[MMM-YYYY].&[" & _
-        Format(dtReportingPeriod, "MMM-YYYY") & _
-        "],[Measures].[(BU PL) Description Grouping Amount USD]) CELL PROPERTIES VALUE, FORMAT_STRING, LANGUAGE, BACK_COLOR, FORE_COLOR, FONT_FLAGS"
+'   Old MDX path (reporting period based)
+'    strMdxPath = "SELECT NON EMPTY Hierarchize(CrossJoin({[d_tbl_tCodeNamesActivity].[Activity_Name].[Activity_Name].AllMembers}, " & _
+'        "{([q_co_PlRanges].[PL_Name].[PL_Name].AllMembers)})) DIMENSION PROPERTIES PARENT_UNIQUE_NAME,MEMBER_VALUE,HIERARCHY_UNIQUE_NAME ON COLUMNS  " & _
+'        "FROM [Model] WHERE ([dm_d_ReportingPeriod_Calendar].[MMM-YYYY].&[" & _
+'        Format(dtReportingPeriod, "MMM-YYYY") & _
+'        "],[dm_d_AccountingPeriod_Calendar].[MMM-YYYY].&[" & _
+'        Format(dtReportingPeriod, "MMM-YYYY") & _
+'        "],[Measures].[(BU PL) Description Grouping Amount USD]) CELL PROPERTIES VALUE, FORMAT_STRING, LANGUAGE, BACK_COLOR, FORE_COLOR, FONT_FLAGS"
+    
+    'New MDX path (no reporting periods, no buisness units)
+    'strMdxPath = "SELECT NON EMPTY Hierarchize({[q_co_plTcodeRanges].[P&L name].[P&L name].AllMembers}) " & _
+                "DIMENSION PROPERTIES PARENT_UNIQUE_NAME,MEMBER_VALUE,HIERARCHY_UNIQUE_NAME ON COLUMNS  " & _
+                "FROM [Model] WHERE ([dm_Calendar].[MMM-YYYY].&[" & _
+                Format(dtReportingPeriod, "MMM-YYYY") & _
+                "],[Measures].[P&L Amount USD]) CELL PROPERTIES VALUE, FORMAT_STRING, LANGUAGE, BACK_COLOR, FORE_COLOR, FONT_FLAGS"
+    
+    strMdxPath = "SELECT NON EMPTY Hierarchize(CrossJoin({[tbl_tCodeNamesActivity].[Activity Name].[Activity Name].AllMembers}, " & _
+                "{([q_co_plTcodeRanges].[P&L name].[P&L name].AllMembers)})) DIMENSION PROPERTIES PARENT_UNIQUE_NAME,MEMBER_VALUE,HIERARCHY_UNIQUE_NAME ON COLUMNS  " & _
+                "FROM [Model] WHERE ([dm_Calendar].[MMM-YYYY].&[" & _
+                Format(dtReportingPeriod, "MMM-YYYY") & _
+                "],[Measures].[P&L Amount USD]) CELL PROPERTIES VALUE, FORMAT_STRING, LANGUAGE, BACK_COLOR, FORE_COLOR, FONT_FLAGS"
+    
                
 'Call function to return data from data model, store in dictionary
     Set dictDmReturnData = GetTableDataFromDataModel(wbUpsfin, strMdxPath)

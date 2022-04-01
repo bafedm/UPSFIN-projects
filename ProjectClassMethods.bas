@@ -12,7 +12,7 @@ Public Function GenerateProjectObjectCollection( _
 
 
 Dim i As Long, j As Long, k As Long
-Dim collProjects                As Collection   'Projects collection, returns to caller
+Dim collProjects                As Collection       'Projects collection, returns to caller
 Dim lsoProjectsTable            As ListObject       'Project Table from worksheet as object
 Dim rngProjectsTable            As Range            'Worksheet range of the projects table
 Dim arrVarProjectDataBodyRange  As Variant          'Data body range from project table

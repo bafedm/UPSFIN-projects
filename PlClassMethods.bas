@@ -12,6 +12,10 @@ Function GeneratePlObjectCollection( _
 
 Dim i As Long, j As Long, k As Long
 Dim strTemp     As String
+Dim wsPlList    As Worksheet
+
+'Assign ws that has the Pl Hierarchy table
+    Set wsPlList = wbUpsfin.Worksheets("P&L TCode Ranges")
 
 'Get P&L list from Data Model
     Dim arrVarPlNamesFromDm As Variant
@@ -27,7 +31,7 @@ Dim strTemp     As String
     Dim arrIntPlHierarchyTableHeaderIndex() As Integer      'column index of wanted columns
     
     'Set list object, get values from header/table
-        Set lsoPlHierarchy = wsProjectWb.ListObjects("tblPlHierarchy")
+        Set lsoPlHierarchy = wsPlList.ListObjects(TBL_PL_HIERARCHY)
         arrVarPlHierarchyTableData = lsoPlHierarchy.DataBodyRange
         arrVarPlHierarchyTableHeader = lsoPlHierarchy.HeaderRowRange
         
@@ -72,12 +76,20 @@ Dim arrVarPlNamesFromDm As Variant
 'Values items: [Measures].[(PROJ) BU Upstream P&Ls Amount USD]
 
 'Set MDX
-    strMdxPath = "SELECT NON EMPTY Hierarchize({[q_co_PlRanges].[PL_Name].[PL_Name].AllMembers}) " & _
+'####OLD Version  (Reporting Period Based)
+'    strMdxPath = "SELECT NON EMPTY Hierarchize({[q_co_PlRanges].[PL_Name].[PL_Name].AllMembers}) " & _
+'                "DIMENSION PROPERTIES PARENT_UNIQUE_NAME,MEMBER_VALUE,HIERARCHY_UNIQUE_NAME ON COLUMNS  " & _
+'                "FROM [Model] WHERE ([dm_d_AccountingPeriod_Calendar].[MMM-YYYY].&[Apr-2021]," & _
+'                "[dm_d_ReportingPeriod_Calendar].[MMM-YYYY].&[Apr-2021]," & _
+'                "[Measures].[(BU PL) Description Grouping Amount USD]) " & _
+'                "CELL PROPERTIES VALUE, FORMAT_STRING, LANGUAGE, BACK_COLOR, FORE_COLOR, FONT_FLAGS"
+
+'New version (no Reporting Period, consolidated business units)
+    strMdxPath = "SELECT NON EMPTY Hierarchize({[q_co_plTcodeRanges].[P&L name].[P&L name].AllMembers}) " & _
                 "DIMENSION PROPERTIES PARENT_UNIQUE_NAME,MEMBER_VALUE,HIERARCHY_UNIQUE_NAME ON COLUMNS  " & _
-                "FROM [Model] WHERE ([dm_d_AccountingPeriod_Calendar].[MMM-YYYY].&[Apr-2021]," & _
-                "[dm_d_ReportingPeriod_Calendar].[MMM-YYYY].&[Apr-2021]," & _
-                "[Measures].[(BU PL) Description Grouping Amount USD]) " & _
-                "CELL PROPERTIES VALUE, FORMAT_STRING, LANGUAGE, BACK_COLOR, FORE_COLOR, FONT_FLAGS"
+                "FROM [Model] WHERE ([dm_Calendar].[MMM-YYYY].&[" & _
+                Format(dtReportingPeriod, "MMM-YYYY") & _
+                "],[Measures].[P&L Amount USD]) CELL PROPERTIES VALUE, FORMAT_STRING, LANGUAGE, BACK_COLOR, FORE_COLOR, FONT_FLAGS"
     
 
 'Call function to return data from data model, store in dictionary

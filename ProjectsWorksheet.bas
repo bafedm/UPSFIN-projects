@@ -76,7 +76,7 @@ For Each objActivity In collActivities
         
     'loop all P&Ls that are in the activity collection
     For Each objPl In objActivity.collParentPl
-            
+                  
         'If the current P&L has the same name as the target P&L then loop projects
         If objPl.strName = objTargetPl.strName Then
                 

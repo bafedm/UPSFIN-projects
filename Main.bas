@@ -1,8 +1,5 @@
 Attribute VB_Name = "Main"
 Option Explicit
-
-
-
 '@Folder("Main")
 '@Description "Main Loop"
 
@@ -24,11 +21,11 @@ Sub Main()
 
 'test data
     'test for one month
-        'dtReportingPeriod = "1-May-2021"
+        dtReportingPeriod = "1-Apr-2021"
     
     'testing for each month - need to comment in/out the "next i" at bottom
-        For i = 1 To 4
-            dtReportingPeriod = CDate(CStr(2021) & "-" & MonthName(i, True) & "-" & "01")
+'        For i = 1 To 4
+'            dtReportingPeriod = CDate(CStr(2021) & "-" & MonthName(i, True) & "-" & "01")
 
         'Load object data from data model
             DataLoad.Main wbUpsfin, wsProjectWb, dtReportingPeriod, collPls, collActivies, collProjects
@@ -43,5 +40,5 @@ Sub Main()
             WorkbookGen.Main collTempPl, collActivies, collProjects, dtReportingPeriod
     
     'testing for each month'
-        Next i
+'        Next i
 End Sub
