@@ -12,7 +12,7 @@ Sub Main()
     Dim wsProjectWb         As Worksheet:   Set wsProjectWb = wbUpsfin.Worksheets(WS_PAF_GEN)
 
 'Global Variables from UPSFIN Workbook
-    Dim dtReportingPeriod   As Date
+    Dim dtAccountingPeriod   As Date
 
 'Global Object Collections
     Dim collPls             As Collection
@@ -21,14 +21,14 @@ Sub Main()
 
 'test data
     'test for one month
-        dtReportingPeriod = "1-Apr-2021"
+        dtAccountingPeriod = "1-Apr-2021"
     
     'testing for each month - need to comment in/out the "next i" at bottom
 '        For i = 1 To 4
 '            dtReportingPeriod = CDate(CStr(2021) & "-" & MonthName(i, True) & "-" & "01")
 
         'Load object data from data model
-            DataLoad.Main wbUpsfin, wsProjectWb, dtReportingPeriod, collPls, collActivies, collProjects
+            DataLoad.Main wbUpsfin, wsProjectWb, dtAccountingPeriod, collPls, collActivies, collProjects
         
             'For now we only want one P&L to test so create new collection and assign Oman P&L
                 Dim collTempPl As Collection
@@ -37,7 +37,7 @@ Sub Main()
                 'collTempPl.Add key:=collPls("ADCO-CHS").strName, item:=collPls("ADCO-CHS")
         
         'Generate workbook for each P&L
-            WorkbookGen.Main collTempPl, collActivies, collProjects, dtReportingPeriod
+            WorkbookGen.Main collTempPl, collActivies, collProjects, dtAccountingPeriod
     
     'testing for each month'
 '        Next i
