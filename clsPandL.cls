@@ -12,7 +12,7 @@ Attribute VB_Exposed = False
 Option Explicit
 
 Private mStrName                As String       'Object Name
-Private mCollChildrenPl      As Collection      'Collection of P&L Names byRef
+Private mCollChildrenPl         As Collection   'Collection of P&L Names byRef
 Private mBoolHasChildren        As Boolean      'True/False if Children present, default false
 Private mIntPlLevel             As Integer      'Indicates the P&L hierarchy level (1 = highest)
 
