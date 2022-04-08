@@ -34,6 +34,39 @@ Dim wsAllocations As Worksheet
 'Write formulas to worksheet
     WriteFormulasToTables wsLcForecast, dtReportingPeriod, arrVarPlTotalsByProject
 
+'Format Forecast Cells
+    FormatProjectForecastCells wsLcForecast, dtReportingPeriod
+    
+
+End Sub
+
+'@Description "formats LC forecast cells that need to be populated by user"
+Private Sub FormatProjectForecastCells( _
+                                        wsLcForecast As Worksheet, _
+                                        dtReportingPeriod As Date)
+
+Dim i As Long, j As Long, k As Long
+Dim n As Name
+Dim rngLocalAnchor As Range
+
+'No need to provide LC forecast for December as it's end of year.
+    If Month(dtReportingPeriod) = 12 Then Exit Sub
+
+'loop named ranges in WS
+For Each n In wsLcForecast.Names
+    'Search each range name and action based on prefix (Project, Activity, or PL)
+    'If Project then format revcost cells for each month from reporting month + 1 to Dec
+        If GenericFunctions.StringSearch(1, n.Name, "Lc.Forecasts_Project.Name_") > 0 Then
+            Set rngLocalAnchor = Range(n)(4, 4)
+            
+            For i = Month(dtReportingPeriod) To 11 'offset range for months is 0 (Jan) to 11 (Dec)
+                PAFCellFormats.FromatInputCell Range(rngLocalAnchor(6, i), rngLocalAnchor(7, i))
+            Next i
+            
+        End If
+Next n
+            
+    
 End Sub
 
 '@Description "Writes all formulas to tables - activities/projects/P&L sums, LC&LC% calc
@@ -86,6 +119,7 @@ Next n
 End Sub
 
 '@Description "Writes the Activity and PL formulas"
+'@TODO: split into separate functions"
 'finished
 Private Sub WriteNonProjectValuesToTables( _
                                             ByRef wsLcForecast As Worksheet, _
@@ -107,7 +141,7 @@ Dim intRevCostRowOffset                 As Integer  'determines the inital row o
 
 Set rngLocalAnchor = Range(nameActivityOrPlRange)(3, 4) 'TODO replace fixed values with variables or constants
 
-'Project LC Tables have an extra row that has the project name.  Activity tables do not have this row.
+'***Project LC Tables have an extra row that has the project name.  Activity tables do not have this row.
 'If we are generating forumlas for an Activity (ie summing Project values) then we need a higher offset to account for the extra row
 'If we are generating formulas for a PL (ie summing Activity Values) then we need use a lower offset since there is no "Project Name" row
     If boolIsActivity = True Then
@@ -119,23 +153,50 @@ Set rngLocalAnchor = Range(nameActivityOrPlRange)(3, 4) 'TODO replace fixed valu
     End If
 
 'For each month up to the report month generate and write the formulas to sum each project/activity for each rev/cost
+'For "Actual"
     For i = 0 To Month(dtReportingPeriod) - 1
         strRevenueSumFormula = "=SUM("
         strCostsSumFormula = "=SUM("
         For j = 0 To UBound(arrVarProjectOrActivityRangeNames, 1)
             If Not IsEmpty(arrVarProjectOrActivityRangeNames(j)) Then
+                '@TODO:  Various following hardcoded offsets should be switchedto constant refernences
                 strRevenueSumFormula = strRevenueSumFormula & wsLcForecast.Range(arrVarProjectOrActivityRangeNames(j))(intRevCostRowOffset + 0, 3 + i).Address & ","
                 strCostsSumFormula = strCostsSumFormula & wsLcForecast.Range(arrVarProjectOrActivityRangeNames(j))(intRevCostRowOffset + 1, 3 + i).Address & ","
             End If
         Next j
         
+        '@TODO:  Various following hardcoded offsets should be switchedto constant refernences
         strRevenueSumFormula = Left(strRevenueSumFormula, Len(strRevenueSumFormula) - 1) & ")"
         rngLocalAnchor(1, i).Formula = strRevenueSumFormula
         strCostsSumFormula = Left(strCostsSumFormula, Len(strCostsSumFormula) - 1) & ")"
         rngLocalAnchor(2, i) = strCostsSumFormula
         
         'write lc,lc%
+        '@TODO:  Various following hardcoded offsets should be switchedto constant refernences
             WriteLcFormulasToTable Range(rngLocalAnchor(3, i), rngLocalAnchor(4, i))
+    Next i
+    
+'For "Forecast"
+    For i = Month(dtReportingPeriod) To 11
+        strRevenueSumFormula = "=SUM("
+        strCostsSumFormula = "=SUM("
+        For j = 0 To UBound(arrVarProjectOrActivityRangeNames, 1)
+            If Not IsEmpty(arrVarProjectOrActivityRangeNames(j)) Then
+            '@TODO:  Various following hardcoded offsets should be switchedto constant refernences
+                strRevenueSumFormula = strRevenueSumFormula & wsLcForecast.Range(arrVarProjectOrActivityRangeNames(j))(intRevCostRowOffset + 5, 3 + i).Address & ","
+                strCostsSumFormula = strCostsSumFormula & wsLcForecast.Range(arrVarProjectOrActivityRangeNames(j))(intRevCostRowOffset + 6, 3 + i).Address & ","
+            End If
+        Next j
+        
+        '@TODO:  Various following hardcoded offsets should be switchedto constant refernences
+        strRevenueSumFormula = Left(strRevenueSumFormula, Len(strRevenueSumFormula) - 1) & ")"
+        rngLocalAnchor(6, i).Formula = strRevenueSumFormula
+        strCostsSumFormula = Left(strCostsSumFormula, Len(strCostsSumFormula) - 1) & ")"
+        rngLocalAnchor(7, i) = strCostsSumFormula
+        
+        'write lc,lc%
+        '@TODO:  Various following hardcoded offsets should be switchedto constant refernences
+            WriteLcFormulasToTable Range(rngLocalAnchor(8, i), rngLocalAnchor(9, i))
     Next i
 
 End Sub
@@ -200,7 +261,7 @@ Private Sub WriteLcFormulasToTable( _
 'LC % formula = Rev / LC
 
 rngTarget(1, 1).FormulaR1C1 = "=IF(AND(ISBLANK(R[-2]C[0]),ISBLANK(R[-1]C[0])),"""",SUM(R[-2]C[0],R[-1]C[0]))"
-rngTarget(2, 1).FormulaR1C1 = "=IF(AND(ISBLANK(R[-3]C[0]),ISBLANK(R[-2]C[0])),"""",R[-3]C[0]/R[-1]C[0])"
+rngTarget(2, 1).FormulaR1C1 = "=IF(AND(ISBLANK(R[-3]C[0]),ISBLANK(R[-2]C[0])),"""",R[-1]C[0]/R[-3]C[0])"
          
 End Sub
 
@@ -415,12 +476,14 @@ Private Sub WriteBlankTablesToLcWorksheet( _
 'next activity
 
 Dim i As Long, k As Long, j As Long
-Dim rngTopAnchor            As Range    'WS Top Anchor
-Dim intLcTableRowOffset     As Integer  'Sets the gap between two Lc forecast tables
-Dim intPlTableRowOffset     As Integer  'Sets the initial gap between the PL level forecast and the top anchor
-Dim intAnchorRowOffset      As Integer  'The active offset from the top anchor.
-Dim intMonthStartCol        As Integer  'Number of columns from the right of anchor to start the month columns
-Dim intTableRowOffset       As Integer  'Number of rows to offset after a blank table is written to the WS
+Dim rngTopAnchor                As Range    'WS Top Anchor
+Dim intLcTableRowOffset         As Integer  'Sets the gap between two Lc forecast tables
+Dim intPlTableRowOffset         As Integer  'Sets the initial gap between the PL level forecast and the top anchor
+Dim intAnchorRowOffset          As Integer  'The active offset from the top anchor.
+Dim intMonthStartCol            As Integer  'Number of columns from the right of anchor to start the month columns
+Dim intTableRowOffset           As Integer  'Number of rows to offset after a blank table is written to the WS
+Dim intActivityRangeStartRow    As Integer  'The starting offset row for an activity and projects.  Used to group rows
+Dim intActivityRangeEndRow      As Integer  'The end offset row for an activity and projects.  Used to group rows.
 
 'Constants
     intLcTableRowOffset = 2
@@ -447,12 +510,14 @@ intAnchorRowOffset = (intLcTableRowOffset * 2) + intPlTableRowOffset
 
 'loop activities
 For i = 0 To UBound(arrVarPlTotalsByProject, 1)
+    'store starting row for grouping
+        intActivityRangeStartRow = rngTopAnchor(intAnchorRowOffset, 1).Row
     'write activity table, return new offset amount
         intTableRowOffset = writeBlankTable(wsLcForecast, dtReportingPeriod, rngTopAnchor(intAnchorRowOffset, 1), intMonthStartCol, arrVarPlTotalsByProject(i, 0))
     'advance row offset
         intAnchorRowOffset = intAnchorRowOffset + intTableRowOffset + intLcTableRowOffset
     
-    'loop projecrts
+    'loop projects
     For j = 0 To UBound(arrVarPlTotalsByProject(i, 1), 1)
         'if project name is "no projects" skip it
             If Not arrVarPlTotalsByProject(i, 1)(j, 0) = "no projects" Then
@@ -462,9 +527,30 @@ For i = 0 To UBound(arrVarPlTotalsByProject, 1)
                     intAnchorRowOffset = intAnchorRowOffset + intTableRowOffset + intLcTableRowOffset
             End If
     Next j
+    
+    'Call function to create group for current activity.
+        groupActivityRows wsLcForecast, intActivityRangeStartRow, rngTopAnchor(intAnchorRowOffset, 1).Row
+        
 Next i
+
+'collapse all groups.
+    wsLcForecast.Outline.ShowLevels RowLevels:=1, ColumnLevels:=1
     
 End Sub
+
+'@Description "groups rows for each activity and it's child projects"
+Private Function groupActivityRows( _
+                                        wsLcForecast As Worksheet, _
+                                        intStartRow As Integer, _
+                                        intEndRow As Integer)
+
+'get first and last rows
+'group
+'collapse (if not be default)
+
+wsLcForecast.Rows(intStartRow + 1 & ":" & intEndRow - 3).Group
+    
+End Function
 
 '@Description "Writes a blank LC table to the worksheet and sets the named range"
 Private Function writeBlankTable( _

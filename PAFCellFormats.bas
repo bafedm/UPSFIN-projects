@@ -2,6 +2,15 @@ Attribute VB_Name = "PAFCellFormats"
 '@Folder("Generate PAF Workbook")
 Option Explicit
 
+Sub FromatInputCell( _
+                        rngTarget As Range)
+                        
+With rngTarget
+    .Interior.Color = RGB(204, 244, 255)
+End With
+    
+End Sub
+
 Sub FormatAllocatedPercCell( _
                                 rngTarget As Range)
       
