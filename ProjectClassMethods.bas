@@ -35,7 +35,10 @@ Dim objProject                  As clsProject       'project object for each pro
 
 'Loop array, create object for each row, assign properties, add to collection
     For i = 1 To UBound(arrVarProjectDataBodyRange, 1)
-       If Format(arrVarProjectDataBodyRange(i, 1), "YYYY-MM-DD") = Format(dtReportingPeriod, "YYYY-MM-DD") Then
+       If Format(arrVarProjectDataBodyRange(i, 1), "YYYY-MM-DD") = Format(dtReportingPeriod, "YYYY-MM-DD") And _
+            arrVarProjectDataBodyRange(i, 6) <= dtReportingPeriod And _
+            arrVarProjectDataBodyRange(i, 7) >= dtReportingPeriod _
+       Then
            Set objProject = ClassFactory.newProjectObject( _
                                                         collPls(arrVarProjectDataBodyRange(i, 2)), _
                                                         arrVarProjectDataBodyRange(i, 1), _
