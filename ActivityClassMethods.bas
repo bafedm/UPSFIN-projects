@@ -191,7 +191,7 @@ Dim strMdxPath                  As String                       'Mdx path for da
                 strPlName & _
                 "],[tbl_tCodeNamesActivity].[Activity Name].&[" & _
                 strActivityName & _
-                "],[Measures].[P&L Amount USD]) CELL PROPERTIES VALUE, FORMAT_STRING, LANGUAGE, BACK_COLOR, FORE_COLOR, FONT_FLAGS"
+                "],[Measures].[(PL)P&L Amount USD]) CELL PROPERTIES VALUE, FORMAT_STRING, LANGUAGE, BACK_COLOR, FORE_COLOR, FONT_FLAGS"
 
 
 'Call function to get table data and return to caller
@@ -335,7 +335,7 @@ Dim arrVarTableDataFromDm()   As Variant                        'return array, 2
                 "{([q_co_plTcodeRanges].[P&L name].[P&L name].AllMembers)})) DIMENSION PROPERTIES PARENT_UNIQUE_NAME,MEMBER_VALUE,HIERARCHY_UNIQUE_NAME ON COLUMNS  " & _
                 "FROM [Model] WHERE ([dm_Calendar].[MMM-YYYY].&[" & _
                 Format(dtReportingPeriod, "MMM-YYYY") & _
-                "],[Measures].[P&L Amount USD]) CELL PROPERTIES VALUE, FORMAT_STRING, LANGUAGE, BACK_COLOR, FORE_COLOR, FONT_FLAGS"
+                "],[Measures].[(PL)P&L Amount USD]) CELL PROPERTIES VALUE, FORMAT_STRING, LANGUAGE, BACK_COLOR, FORE_COLOR, FONT_FLAGS"
     
                
 'Call function to return data from data model, store in dictionary
