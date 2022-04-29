@@ -18,9 +18,9 @@ Dim strSavePath         As String       'Path to store the PAF workbooks
 
 Set collPafWorkbooks = New Collection
 'home path
-     strSavePath = "C:\Users\Blake\OneDrive\98 Misc\Special Assignments\UPSFIN\Project UPSFIN\PAF Workbooks\"
+    'strSavePath = "C:\Users\Blake\OneDrive\98 Misc\Special Assignments\UPSFIN\Project UPSFIN\PAF Workbooks\"
 'work path
-    'strSavePath = "C:\Users\blake_fudge\OneDrive - SGS\Ops\Misc\Special Assignments\UPSFIN\Project UPSFIN\PAF Workbooks\"
+    strSavePath = "C:\Users\blake_fudge\OneDrive - SGS\Ops\Misc\Special Assignments\UPSFIN\Project UPSFIN\PAF Workbooks\"
 
 'Main loop for each P&L in collection
     For Each objPl In collPls
@@ -36,7 +36,9 @@ Set collPafWorkbooks = New Collection
         'write to lc forecast worksheet
             LcForecastWorksheet.Main wbPaf, objPl, dtReportingPeriod, collActivities
             
-        
+        'write source data
+            WriteSourceData.Main wbPaf, collActivities, collProjects, objPl
+            
     
     Next objPl
 
