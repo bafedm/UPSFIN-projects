@@ -46,7 +46,12 @@ Dim arrVarPlTotals              As Variant      '2d array of months, (0)Rev Amou
        
 'Populate worksheet
     LcForecastPopWs.WriteToLcWorksheet objPl, wbPaf, arrVarPlTotalsByProject, dtReportingPeriod
-
+    
+'Debug
+    'DebugCheck_arrVarPlTotalsByProject arrVarPlTotalsByProject
+    
+'Write Pl Lc Values to Source Worksheet
+    WritePlLcData arrVarPlTotalsByProject, wbPaf
 
 
 End Sub
